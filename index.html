@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'self'; frame-src 'self' http://localhost:3000; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+		/>
+		<title>Auto Front</title>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body>
+		<div id="editor-container">
+			<div id="floating-window">
+				<div id="window-header">
+					<span>Auto Front End</span>
+				</div>
+
+				<div class="button-container">
+					<button id="undo-btn" onclick="undoAction()">Undo</button>
+					<button id="redo-btn" onclick="redoAction()">Redo</button>
+				</div>
+
+				<div style="margin: 10px 0">
+					<input
+						type="text"
+						id="project-dir-input"
+						placeholder="Enter project directory"
+					/>
+					<button onclick="submitProjectDir()">Submit</button>
+				</div>
+				<div id="project-display">Project Directory: None</div>
+
+				<div id="component-display">Component: None</div>
+
+				<button id="toggle-code-btn" onclick="toggleCodeEditor()">
+					Show/Hide Code
+				</button>
+
+				<span class="button-container">
+					<input type="text" id="text-input" placeholder="Enter text here" />
+					<button onclick="sendInput()">Send</button>
+				</span>
+
+				<span class="button-container">
+					<button id="mobile-btn" onclick="simulateSize('mobile')">
+						Mobile
+					</button>
+					<button id="tablet-btn" onclick="simulateSize('tablet')">
+						Tablet
+					</button>
+					<button id="pc-btn" onclick="simulateSize('pc')">PC</button>
+				</span>
+
+				<button id="edit-btn" onclick="toggleEditMode()">
+					Toggle Edit Mode
+				</button>
+			</div>
+
+			<div id="code-editor">
+				<textarea id="code-area" placeholder="Edit code here..."
+                
+                
+                ></textarea>
+				<button id="save-code-btn" onclick="saveEdit()">Save</button>
+				<button id="close-code-btn" onclick="toggleCodeEditor()">Close</button>
+			</div>
+		</div>
+
+		<script src="drag.js"></script>
+		<script src="index.js"></script>
+	</body>
+</html>
