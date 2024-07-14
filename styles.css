@@ -40,9 +40,7 @@ body, html {
 }
 
 #text-input {
-    width: calc(100% - 20px);
-    margin: 10px;
-    padding: 5px;
+  
 }
 
 .button-container {
@@ -99,4 +97,200 @@ body, html {
 
 #save-code-btn {
     background-color: #28a745; /* Green color to indicate a 'save' action, similar to Bootstrap's success color */
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  
+    color: #333;
+}
+
+#editor-container {
+    display: flex;
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    width: calc(100% - 100px);
+    height: calc(100% - 100px);
+}
+
+#floating-window {
+    position: absolute;
+    top: 50px;
+    left: 50px;
+    width: 350px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+#window-header {
+    background-color: #007BFF;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    font-size: 16px;
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.action-btn {
+    margin: 5px 0;
+    width: calc(100% - 20px);
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.action-btn:hover {
+    background-color: #0056b3;
+}
+
+.input-container {
+    display: flex;
+    padding: 10px;
+}
+
+input[type="text"] {
+    width: calc(100% - 100px);
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.submit-btn {
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #218838;
+}
+
+#project-display, #component-display {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    border-bottom: 1px solid #e9ecef;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+#toggle-code-btn, #edit-btn {
+    padding: 10px;
+    background-color: #ffc107;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 10px;
+    transition: background-color 0.3s;
+}
+
+#toggle-code-btn:hover, #edit-btn:hover {
+    background-color: #e0a800;
+}
+
+.device-btn {
+    margin: 5px;
+    padding: 10px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.device-btn:hover {
+    background-color: #5a6268;
+}
+
+#search-and-list {
+    padding: 10px;
+}
+
+#search-input {
+    width: calc(100% - 100px);
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+#search-btn {
+    padding: 10px;
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+#search-btn:hover {
+    background-color: #138496;
+}
+
+#name-list {
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#name-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+#name-list::-webkit-scrollbar-thumb {
+    background-color: #007BFF;
+    border-radius: 4px;
+}
+
+.name-btn {
+    display: block;
+    width: calc(100% - 20px);
+    margin: 5px auto;
+    padding: 10px;
+    background-color: #343a40;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.name-btn:hover {
+    background-color: #23272b;
 }

@@ -44,9 +44,18 @@ function submitProjectDir() {
 }
 
 
-function sendInput() {
+function sendInput(operation) {
+    if (!path) {
+        alert('Please select a component first.');
+        return;
+    }
+
     const input = document.getElementById('text-input').value;
-    window.electron.send('input-event', input);
+    document.getElementById('text-input').value = '';  // Clear the input field
+
+    console.log('Sending input:', operation, input, path);
+
+    window.electron.sendEvent('input-event', { operation, input, path });
 }
 
 function toggleFloatingWindow() {
@@ -66,6 +75,11 @@ function redoAction() {
         currentHistoryIndex++;
         // Restore state based on new currentHistoryIndex
     }
+}
+
+function publishEdit() {
+    console.log('Publishing edit:', path);
+    window.electron.sendEvent('publish', {path });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -88,6 +102,27 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('code-area').textContent = content;
     });
 
+
+    window.electron.receiveEvent('components', (event, data) => {
+        console.log('Received components:', data);
+        const nameListContainer = document.getElementById('name-list');
+        nameListContainer.innerHTML = ''; // Clear existing buttons
+
+        data.forEach(item => {
+            const button = document.createElement('button');
+            button.textContent = item.name;
+            button.className = 'name-btn';
+            button.onclick = function() {
+                console.log('Selected component:', item.path);
+                window.electron.sendEvent('select-component', {path: item.path });
+            };
+            nameListContainer.appendChild(button);
+        });
+    });
+
+
+
+
     document.getElementById('project-dir-input').addEventListener('click', () => {
         document.getElementById('project-dir-input').focus();
     });
@@ -95,8 +130,4 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('text-input').addEventListener('click', () => {
         document.getElementById('text-input').focus();
     });
-
-
-
-
 });

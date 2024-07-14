@@ -7,6 +7,7 @@ const {
 } = require("electron");
 const path = require("node:path");
 const fs = require("fs");
+const axios = require("axios");
 
 let projectDir = ""; // Variable to store the project directory path
 let translatedX = 0;
@@ -41,8 +42,8 @@ const createWindow = () => {
 	view.webContents.loadURL("http://localhost:3000");
 	view.setBounds({ x: 0, y: 0, width: width, height });
 
-    const toggleEditMode = () => {
-        view.webContents.executeJavaScript(`
+	const toggleEditMode = () => {
+		view.webContents.executeJavaScript(`
             if (window.persistentHandlers && window.persistentHandlers.length > 0) {
                window.persistentHandlers.forEach(item => {
                    item.element.removeEventListener("mouseover", item.handlers.mouseover);
@@ -102,12 +103,11 @@ const createWindow = () => {
                }
            }
        `);
-    };
-
+	};
 
 	view.webContents.on("did-finish-load", () => {
 		// add an on hover to all the elements
-        toggleEditMode();
+		toggleEditMode();
 	});
 
 	/*const floatingWindow = new BrowserWindow({
@@ -217,6 +217,8 @@ const createWindow = () => {
 
 	// In the main process or appropriate preload script
 	ipcMain.on("forward-event", (event, data) => {
+		// make the view focus
+
 		if (data.type === "mousemove") {
 			view.webContents.sendInputEvent({
 				type: "mouseMove",
@@ -224,6 +226,8 @@ const createWindow = () => {
 				y: data.y,
 			});
 		} else if (data.type === "click") {
+			view.webContents.focus();
+
 			view.webContents.debugger.sendCommand("Input.dispatchMouseEvent", {
 				type: "mousePressed",
 				x: data.x,
@@ -244,39 +248,168 @@ const createWindow = () => {
 		}
 	});
 
-    ipcMain.on("save-edit", (event, data) => {
-        const { path, content } = data;
-        fs.writeFile(path, content, 
-            (err) => {
-                if (err) {
-                    console.error("Error writing file:", err);
-                } else {
-                    console.log("File saved successfully:", path);
-                }
-            }
-        );
-    });
+	ipcMain.on("save-edit", (event, data) => {
+		const { path, content } = data;
+		fs.writeFile(path, content, (err) => {
+			if (err) {
+				console.error("Error writing file:", err);
+			} else {
+				console.log("File saved successfully:", path);
+			}
+		});
+	});
 
+	const makeEdits = (requested_change, filepath, csspath) => {
+		fs.readFile(filepath, "utf8", (err, componentContent) => {
+			if (err) {
+				console.error(`Error reading file ${filepath}:`, err);
+				return;
+			}
 
+			fs.readFile(csspath, "utf8", (err, stylesheetContent) => {
+				if (err) {
+					console.error(`Error reading file ${csspath}:`, err);
+					return;
+				}
 
+				const postData = {
+					tweaks: {
+						"TextInput-wJ4wa": { input_value: stylesheetContent },
+						"TextInput-YlzsL": {
+							input_value: requested_change,
+						},
+						"TextInput-PB9Pc": {
+							input_value: componentContent,
+						},
+					},
+				};
 
+				axios
+					.post(
+						"http://127.0.0.1:7860/api/v1/run/b7ebf8e7-688c-48f2-ac7c-aaaa55da0ed6?stream=false",
+						postData
+					)
+					.then((response) => {
+						const text =
+							response.data.outputs[0].outputs[0].results.text.data.text;
 
-    ipcMain.on("toggle-edit-mode", (event, data) => {
-        toggleEditMode();
-    });
+						// Function to extract sections based on delimiters
+						function extractSection(fullText, sectionStartDelimiter) {
+							const startIndex =
+								fullText.indexOf(sectionStartDelimiter) +
+								sectionStartDelimiter.length;
+							const endIndex = fullText.indexOf("```", startIndex);
+							return fullText.substring(startIndex, endIndex).trim();
+						}
 
-	// Listen for
-	ipcMain.on("click-event", (event, data) => {
-		if (!projectDir) {
-			console.error("Project directory not set");
-			event.reply("component-selected", { error: "Project directory not set" });
-			return;
+						// Extract UPDATED REACT COMPONENT
+						const updatedReactComponent = extractSection(text, "```jsx");
+						console.log("UPDATED REACT COMPONENT:", updatedReactComponent);
+
+						// Extract UPDATED STYLESHEET
+						const updatedStylesheet = extractSection(text, "```css");
+						console.log("UPDATED STYLESHEET:", updatedStylesheet);
+
+						// Write the updated content to the files
+						fs.writeFile(filepath, updatedReactComponent, (err) => {
+							if (err) {
+								console.error("Error writing file:", err);
+							} else {
+								console.log("File saved successfully:", filepath);
+							}
+						});
+
+						fs.writeFile(csspath, updatedStylesheet, (err) => {
+							if (err) {
+								console.error("Error writing file:", err);
+							} else {
+								console.log("File saved successfully:", csspath);
+							}
+						});
+					})
+					.catch((error) => {
+						console.error("Error making POST request:", error);
+					});
+			});
+		});
+	};
+
+	ipcMain.on("input-event", (event, data) => {
+		console.log("Input event received:", data);
+		let requested_change = data.input;
+		const filepath = data.path;
+		const csspath = data.path.replace(".tsx", ".css").replace(".jsx", ".css");
+
+		console.log("Filepath:", filepath);
+		if (data.operation === "edit") {
+			// read contents from path
+			makeEdits(requested_change, filepath, csspath);
+		} else if (data.operation === "new") {
+			const postData = {
+				tweaks: {
+					"TextInput-0sJqW": {
+						input_value: requested_change,
+					},
+				},
+			};
+
+			axios
+				.post("http://127.0.0.1:7860/api/v1/run/coder-1?stream=false", postData)
+				.then((response) => {
+					const text =
+						response.data.outputs[0].outputs[0].results.text.data.text;
+
+					// Function to extract sections based on delimiters
+					function extractSection(fullText, sectionStartDelimiter) {
+						const startIndex =
+							fullText.indexOf(sectionStartDelimiter) +
+							sectionStartDelimiter.length;
+						const endIndex = fullText.indexOf("```", startIndex);
+						return fullText.substring(startIndex, endIndex).trim();
+					}
+
+					const filename = extractSection(text, "```plaintext");
+					console.log("Filename:", filename);
+
+					// Extract UPDATED REACT COMPONENT
+					const newReactComponent = extractSection(text, "```jsx");
+					console.log("NEW REACT COMPONENT:", newReactComponent);
+
+					// Extract UPDATED STYLESHEET
+					const newStyleSheet = extractSection(text, "```css");
+					console.log("NEW STYLESHEET:", newStyleSheet);
+
+					const directory = path.join(projectDir, "src");
+
+					// Ensure the directory exists
+					if (!fs.existsSync(directory)) {
+						fs.mkdirSync(directory, { recursive: true });
+					}
+
+					// Create and write the .tsx file
+					const tsxFilePath = path.join(directory, `${filename}.tsx`);
+					fs.writeFileSync(tsxFilePath, newReactComponent, "utf8");
+					console.log(`File written: ${tsxFilePath}`);
+
+					// Create and write the .css file
+					const cssFilePath = path.join(directory, `${filename}.css`);
+					fs.writeFileSync(cssFilePath, newStyleSheet, "utf8");
+					console.log(`File written: ${cssFilePath}`);
+
+					//
+					requested_change =
+						`The new component ${filename} has been created at ${tsxFilePath}.
+					Simply add the new component to this React component in the appropriate location while keeping the requested change in mind:` +
+						requested_change;
+					makeEdits(requested_change, filepath, csspath);
+				})
+				.catch((error) => {
+					console.error("Error making POST request:", error);
+				});
 		}
+	});
 
-		// Use fs to locate the file
-		const filePath = path.join(projectDir, data.component);
-
-		// Check if the file exists
+	const displayComponent = (filePath) => {
 		fs.stat(filePath, (err, stats) => {
 			if (err) {
 				// Handle errors (e.g., file does not exist)
@@ -299,8 +432,7 @@ const createWindow = () => {
 							error: err.message,
 						});
 					} else {
-
-                        console.log("Filepath:", filePath);
+						console.log("Filepath:", filePath);
 
 						// Send back that the file exists, its path, and its content
 						floatingView.webContents.send("component-selected", {
@@ -312,13 +444,135 @@ const createWindow = () => {
 				});
 			}
 		});
+	};
+
+	ipcMain.on("select-component", (event, data) => {
+		if (!projectDir) {
+			console.error("Project directory not set");
+			event.reply("component-selected", { error: "Project directory not set" });
+			return;
+		}
+		console.log("Selecting component:", data);
+		// Use fs to locate the file
+		const filePath = data.path;
+
+		displayComponent(filePath);
+	});
+
+	ipcMain.on("toggle-edit-mode", (event, data) => {
+		toggleEditMode();
+	});
+
+	// Listen for
+	ipcMain.on("click-event", (event, data) => {
+		if (!projectDir) {
+			console.error("Project directory not set");
+			event.reply("component-selected", { error: "Project directory not set" });
+			return;
+		}
+
+		// Use fs to locate the file
+		const filePath = path.join(projectDir, data.component);
+
+		// Check if the file exists
+		displayComponent(filePath);
 	});
 
 	ipcMain.on("set-project-dir", (event, path) => {
-		console.log("Project directory set to:", projectDir);
-
 		projectDir = path; // Set the project directory
+		getComponents();
 	});
+
+	ipcMain.on("publish", (event, data) => {
+		const tsxFilePath = data.path;
+		const cssFilePath = tsxFilePath.replace(".tsx", ".css");
+
+		// read contents from path
+		fs.readFile(tsxFilePath, "utf8", (err, componentContent) => {
+			if (err) {
+				console.error(`Error reading file ${tsxFilePath}:`, err);
+				return;
+			}
+
+			fs.readFile(cssFilePath, "utf8", (err, stylesheetContent) => {
+				if (err) {
+					console.error(`Error reading file ${cssFilePath}:`, err);
+					return;
+				}
+
+				const postData = {
+					tweaks: {
+						"TextInput-CvG7I": { input_value: stylesheetContent },
+						"TextInput-oMf5Z": { input_value: componentContent },
+						"TextInput-qpz8p": { input_value: data.path },
+					},
+				};
+
+				console.log("Post data:", postData);
+
+			
+				axios
+					.post(
+						"http://127.0.0.1:7860/api/v1/run/cb407322-1e4a-4f7b-80f8-5416f691e852?stream=false",
+						postData
+					)
+					.then((response) => {
+						console.log("Response:", response.data);
+						getComponents();
+					})
+					.catch((error) => {
+						console.error("Error making POST request:", error);
+					});
+			});
+		});
+	});
+
+	function getComponents ()  {
+	fetch(
+		"http://127.0.0.1:7860/api/v1/run/b75eab67-123e-4d54-8de5-7d71fbf5a2a8?stream=false",
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				tweaks: {
+					"TextInput-KsQ02": { input_value: "all" },
+				},
+			}),
+		}
+	)
+		.then((response) => response.json())
+		.then((data) => {
+			let namesList = JSON.parse(
+				data.outputs[0].outputs[0].results.text.data.text
+			);
+			//console.log(namesList);
+
+			// filter out any that dont have .path
+			namesList = namesList.filter((item) => item.path);
+
+			// filter out duplicate names
+			const uniqueNames = new Set();
+			namesList = namesList.filter((item) => {
+				if (!uniqueNames.has(item.path)) {
+					uniqueNames.add(item.path);
+					return true;
+				}
+				return false;
+			});
+
+			namesList.forEach((item) => {
+				item.name = item.path.split("\\").pop();
+			});
+
+			// send to floating window
+			floatingView.webContents.send("components", namesList);
+		})
+		.catch((error) => console.error("Error:", error));
+	};
+
+
 };
 
 app.on("window-all-closed", () => {
