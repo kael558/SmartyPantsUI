@@ -1,46 +1,91 @@
-A software with the following:
-- Can display a localhost website in a frame
-- Can modify the contents in the frame
-- Show components outside the displayed website (like a sidebar)
-- Read/write files
+# Smarty Pants UI
 
+<a name="readme-top"></a>
 
-Remaining tasks:
-[x] Integrate existing component modification with endpoint
-[x] Addition of new component
-- [x] Generates the component and style for the new component
-- [x] Add the new component to the existing component
-[x] Module search frontend and backend
-[x] Prettify CSS
-[ ] Make presentation & video
-[ ] Write documentation
+[![MIT License][license-shield]][license-url]
 
-This is a starter react template.
-And this is typically how your development environment looks like (show vscode side by side with web browser). You make a change in your code and it reflects immediately on the UI. 
-
-Now let me spin our integrated environment. Now theres a few key differences between the development processes.
-
-We have a floating window that appears on top of our React environment. 
-
-I’m going to copy paste our project_dir for the project we want to edit. 
-
-And you can now hover over the different elements to see them better. In addition, you can click them and you can see the corresponding React code.
-
-Here we just have one component, which is the App.tsx.
-
-Let’s say I want to add a new component. I’m going to add a Greeting component that says hello world. Now in the old development process, I’d have to create a new file, css, and add all the code manually. In this version, I can just say, 
-*add a new component called the greeting component that says "Hello World"*
-
-And lets see what it does. It adds the files, and makes the necessary edits. We have a new component called the GreetingComponent.
-
-Perfect. We can hover over this new component, click it and see the code. Let's publish this component to our vector database. This means that we can now access it at any point if we need. And we can always use the search in case we have too many components.
-
-Let's make some more changes. I want this page to be an email sign up page.
-*change the component to be an email sign up page*
-
-Perfect.
-
-We can test our app in mobile, tablet or pc view to make sure the styling is correct. 
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#-what-is-this">What is this?</a></li>
+    <li>
+      <a href="#-getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#-quick-install">Quick Install</a></li>
+        <li><a href="#-run-the-langflows">Run the Langflows</a></li>
+        <li><a href="#-running-a-local-development-server">Running a Local Development Server</a></li>
+        <li><a href="#-start-up-the-development-environment">Start up the Development Environment</a></li>
+      </ul>
+    </li>
+    <li><a href="#-roadmap">Roadmap</a></li>
+    <li><a href="#-contributing">Contributing</a></li>
+    <li><a href="#-license">License</a></li>
+  </ol>
+</details>
 
 
 
+## 🤔 What is this?
+An integrated development environment to speed up front-end development.
+
+A user can view their development server through the development environment to gain access to features.
+
+## 📖 Getting Started 
+### ⚡️ Quick Install
+Clone the project to your desired folder with:
+`git clone https://github.com/kael558/SmartyPantsUI.git`
+
+### ⛓️ Run the Langflows
+Download the 4 langflows and populate the API keys/applications secrets.
+
+These are now an API that you can call from your local machine.
+
+### 🤖 Running a Local Development Server
+Navigate to the templates folder and open 'my-app' for a good first example. 
+
+Make sure to run `npm i` and then `npm start` to spin up the local development server.
+
+### 📁 Start up the Development Environment
+Navigate back to the root of the project.
+
+Do the same and run `npm i` and then `npm start` 
+
+Copy your path from the Local Development Server and paste it in the project_dir, so that the environment knows where the files are. 
+
+By this point you should have:
+- Langflow running with 4 langflow endpoints
+- A local development server running the react starter template
+- The development environment
+
+The current main features in the Development Environment are:
+- Clicking on the UI and seeing the retrieved source code. You can make edits and save that code to see live updates in the UI
+- After a component is select, you may type in the text input and:
+  -- Request an edit (for e.g. Changing the text/styling) and then clicking 'Edit'
+  -- Add a new component (for e.g. Add a Greeting component that says Hello world) and then clicking 'Add New' which will create new component files
+- You may publish a component so it is saved in the vector database and accessible by search. The purpose of this is:
+  -- So a user can easily select and find components in their project
+  -- It is also for a future feature to allow re-use of existing components instead of always creating new ones. 
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## 📅 Roadmap
+- [x] Initial POC
+- [ ] Project aware styling
+- [ ] Handling re-use of components
+- [ ] Expanding frameworks to include others (like next.js)
+
+## 🤝 Contributing
+You may fork the project and work in your own repository.
+
+## ⚖️ License
+Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
+[license-shield]: https://img.shields.io/github/license/kael558/SmartyPantsUI.svg?style=for-the-badge
+[license-url]: https://github.com/kael558/SmartyPantsUI/blob/main/LICENSE
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[rahel-linkedin-url]: https://www.linkedin.com/in/rahelgunaratne/
