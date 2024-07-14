@@ -55,17 +55,18 @@ Copy your path from the Local Development Server and paste it in the project_dir
 
 By this point you should have:
 - Langflow running with 4 langflow endpoints
-- A local development server running the react starter template
+- A local development server running the React starter template
 - The development environment
 
 The current main features in the Development Environment are:
-- Clicking on the UI and seeing the retrieved source code. You can make edits and save that code to see live updates in the UI
-- After a component is select, you may type in the text input and:
-  -- Request an edit (for e.g. Changing the text/styling) and then clicking 'Edit'
-  -- Add a new component (for e.g. Add a Greeting component that says Hello world) and then clicking 'Add New' which will create new component files
+- Clicking on the UI and seeing the retrieved source code. You can make edits and save that code to see live updates in the UI.
+- After a component is selected, you may type in the text input and:
+  - Request an edit (e.g., changing the text/styling) and then clicking 'Edit'
+  - Add a new component (e.g., add a Greeting component that says "Hello world") and then clicking 'Add New' which will create new component files
 - You may publish a component so it is saved in the vector database and accessible by search. The purpose of this is:
-  -- So a user can easily select and find components in their project
-  -- It is also for a future feature to allow re-use of existing components instead of always creating new ones. 
+  - So a user can easily select and find components in their project
+  - It is also for a future feature to allow re-use of existing components instead of always creating new ones
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
