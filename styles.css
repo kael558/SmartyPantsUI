@@ -6,12 +6,9 @@ body, html {
 }
 
 #editor-container {
-    display: flex; /* Enables flexbox layout */
-    position: absolute; /* Absolute positioning relative to nearest positioned ancestor */
-    top: 50px;
-    left: 50px;
-    width: calc(100% - 100px); /* Adjust width as necessary, here it's full width minus some margin */
-    height: calc(100% - 100px); /* Adjust height to not occupy full screen, just an example */
+    display: flex;
+    flex-direction: column;
+
 }
 #floating-window {
     position: absolute;
@@ -54,7 +51,7 @@ body, html {
 }
 
 #edit-btn {
-    background-color: green
+    background-color: green;
 
 }
 

@@ -12,10 +12,8 @@
 	</head>
 	<body>
 		<div id="editor-container">
-			<div id="floating-window">
-				<div id="window-header">
-					<span>SmartyPants UI</span>
-				</div>
+			
+	
 
 				<div class="button-container">
 					<button id="undo-btn" onclick="undoAction()">Undo</button>
@@ -38,16 +36,6 @@
 					Show/Hide Code
 				</button>
 
-				<div id="search-and-list">
-					<div>
-						<input type="text" id="search-input" placeholder="Search components..." />
-						<button id="search-btn" onclick="searchComponents()">Search</button>
-					</div>
-					<div id="name-list">
-				
-					</div>
-				</div>
-
 				<span class="button-container">
 					<input type="text" id="text-input" placeholder="Enter text here" />
 					<button onclick="sendInput('edit')">Edit</button>
@@ -67,17 +55,17 @@
 				<button id="edit-btn" onclick="toggleEditMode()">
 					Toggle Edit Mode
 				</button>
-			</div>
 
-			<div id="code-editor">
-				<textarea id="code-area" placeholder="Edit code here..."
-                
-                
-                ></textarea>
-				<button id="save-code-btn" onclick="saveEdit()">Save</button>
-				<button id="close-code-btn" onclick="toggleCodeEditor()">Close</button>
-				<button id="publish-code-btn" onclick="publishEdit()">Publish</button>
-			</div>
+				<div id="status-bar" style="position: fixed; bottom: 0; width: 100%; background: lightgray; padding: 10px; text-align: center;">
+					<i id="status-icon" class=""></i>
+					Status: <span id="status-message">Ready</span>
+				</div>
+				
+
+
+			
+
+		
 		</div>
 
 		<script src="drag.js"></script>
