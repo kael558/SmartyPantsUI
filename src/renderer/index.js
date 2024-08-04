@@ -3,6 +3,8 @@ let history = [];
 let currentHistoryIndex = -1;
 let path = "";
 
+console.log("hello");
+
 const status_bar = document.getElementById("status-message");
 const status_bar_icon = document.getElementById("status-icon");
 
@@ -30,6 +32,10 @@ function handleError(operation, error) {
 async function sendEventAndHandleResponse(operation, channel, data, cb) {
 	handleOperation(operation);
     try {
+    
+    		cb && cb();
+        handleSuccess(channel);
+    		return;
         // the response is always wrapped in success & data or error
         const response = await window.electron.sendEventAsync(channel, data);
 
@@ -111,9 +117,9 @@ async function submitProjectDir() {
 			"set-project-dir",
 			projectDir,
 			(response) => {
-				document.getElementById(
-					"project-display"
-				).textContent = `Project Directory: ${projectDir}`;
+				document.getElementById("project-display").textContent = `Project Directory: ${projectDir}`;
+        
+        		document.getElementById("main-ui").style.display = "block";
 			}
 		);
 	} else {
@@ -160,7 +166,7 @@ async function makeNewComponent() {
 	);
 }
 
-async function setPromptInstructions() {
+async function setPromptInstructionsForEdit() {
 	const prompt = document.getElementById("prompt-instructions");
 
 	if (!prompt.value) {
@@ -178,6 +184,8 @@ async function setPromptInstructions() {
 		}
 	);
 }
+
+function updatePrompt() {
 
 function togglePromptInstructions() {
 	const prompt = document.getElementById("fullscreen-edit");
@@ -240,6 +248,89 @@ function redoAction() {
 		// Restore state based on new currentHistoryIndex
 	}
 }
+
+    // Function to go back to main UI from URL input page
+    function backToMainUI() {
+        urlInputPage.style.display = "none";
+        mainUI.style.display = "block";
+    }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const projectDirContainer = document.getElementById("project-dir-container");
+    const mainUI = document.getElementById("main-ui");
+    const urlInputPage = document.getElementById("url-input-page");
+
+    // Function to set up input focus
+    function setupInputFocus(inputId) {
+        document.getElementById(inputId).addEventListener("click", () => {
+            document.getElementById(inputId).focus();
+        });
+    }
+
+    setupInputFocus("project-dir-input");
+    setupInputFocus("text-input");
+    setupInputFocus("url-input");
+
+
+
+    // Setup dropdowns
+    function setupDropdown(dropdownId) {
+        const dropdown = document.getElementById(dropdownId);
+        const dropbtn = dropdown.querySelector(".dropbtn");
+        const dropdownContent = dropdown.querySelector(".dropdown-content");
+
+        dropbtn.addEventListener("click", () => {
+            dropdownContent.style.display = dropdownContent.style.display === "block" ? "none" : "block";
+        });
+
+        // Close the dropdown when clicking outside
+        window.addEventListener("click", (e) => {
+            if (!dropdown.contains(e.target)) {
+                dropdownContent.style.display = "none";
+            }
+        });
+    }
+
+    setupDropdown("edit-dropdown");
+    setupDropdown("layout-dropdown");
+    setupDropdown("options-dropdown");
+
+
+
+    // Setup device selection handlers
+    document.querySelectorAll("#layout-dropdown .dropdown-content a").forEach(item => {
+        item.addEventListener("click", (e) => {
+            e.preventDefault();
+            const device = e.target.getAttribute("data-device");
+            if (device) {
+                handleDeviceSelection(device);
+            } else if (e.target.id === "rotate-btn") {
+                // Implement rotation logic here
+                console.log("Rotate device");
+            }
+        });
+    });
+
+ 
+
+
+    // Setup options dropdown handlers
+    document.getElementById("open-dev-tools").addEventListener("click", openDevTools);
+    document.getElementById("update-prompt").addEventListener("click", updatePrompt);
+    document.getElementById("enter-url").addEventListener("click", handleUrlInput);
+
+    // Setup URL input page handlers
+    document.getElementById("submit-url-btn").addEventListener("click", submitUrl);
+    document.getElementById("back-to-main-btn").addEventListener("click", backToMainUI);
+
+    // Setup button event listeners
+    document.getElementById("project-dir-submit-btn").addEventListener("click", submitProjectDir);
+    document.getElementById("undo-btn").addEventListener("click", undoAction);
+    document.getElementById("redo-btn").addEventListener("click", redoAction);
+    document.getElementById("edit-component-btn").addEventListener("click", editComponent);
+    document.getElementById("new-component-btn").addEventListener("click", makeNewComponent);
+    document.getElementById("toggle-edit-mode-btn").addEventListener("click", toggleEditMode);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById("project-dir-input").addEventListener("click", () => {
@@ -311,7 +402,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById("set-url-submit-btn").addEventListener("click", loadURL);
 
     // Electron event listeners
-    window.electron.receiveEvent("component-selected", (event, data) => {
+    /*window.electron.receiveEvent("component-selected", (event, data) => {
         console.log("Received component-selected:", data);
         updateComponentDisplay(data);
     });
@@ -324,7 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.electron.receiveEvent("status-update", (event, data) => {
         console.log("Received status:", data);
         handleOperation(data);
-    });
+    });*/
 });
 
 function updateComponentDisplay(data) {
