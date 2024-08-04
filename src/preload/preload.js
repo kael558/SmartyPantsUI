@@ -11,7 +11,7 @@ contextBridge.exposeInMainWorld("electron", {
 
 	sendEventAsync: (channel, data) => {
 		// Sends an async event from renderer to main and waits for a response to say it was successful
-		ipcRenderer.invoke(channel, data);
+		return ipcRenderer.invoke(channel, data);
 	},
 
 	receiveEvent: (channel, func) => {
