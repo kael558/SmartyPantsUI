@@ -27,7 +27,10 @@
 				<button class="submit-btn" id="project-dir-submit-btn"><i class="fas fa-check"></i></button>
 			</div>
 			<div id="project-display-container" >
-				<i class="fas fa-folder-open"></i><span id="project-display">Project: None</span>
+				<span class="flex-container">
+					<i class="fas fa-folder-open"></i><p class="left-ellipsis"><span id="project-display" class="left-ellipsis">Project: None</span></p>
+				</span>
+				
 			</div>
 
 			<div class="top-controls">
@@ -42,13 +45,13 @@
 					</div>
 				</div>
 				<button id="open-dev-tools" class="action-btn">Open Dev Tools</button>
-				<button id="toggle-fullscreen" class="action-btn">Update Instructions</button>
-				<button id="reload-btn" class="action-btn"><i class="fas fa-sync-alt"></i></button>
-				<button id="undo-btn" class="action-btn"><i class="fas fa-undo"></i></button>
-				<button id="redo-btn" class="action-btn"><i class="fas fa-redo"></i></button>
+				<button id="toggle-fullscreen" class="action-btn">Update Prompt</button>
+				
+				
 			</div>
 
 			<div class="input-container">
+				<button id="reload-btn" class="action-btn"><i class="fas fa-sync-alt"></i></button>
 				<input
 					type="text"
 					id="url-input"
@@ -60,6 +63,12 @@
 			<div id="component-display">
 				<i class="fas fa-puzzle-piece"></i> Component: None
 			</div>
+
+			<div class="top-controls">
+			<button id="undo-btn" class="action-btn"><i class="fas fa-undo"></i></button>
+			<button id="redo-btn" class="action-btn"><i class="fas fa-redo"></i></button>
+			</div>
+
 			<textarea
 				id="text-input"
 				placeholder="Write your requested changes here..."

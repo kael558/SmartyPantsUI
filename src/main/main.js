@@ -15,6 +15,7 @@ const statAsync = promisify(fs.stat);
 const store = new Store();
 
 let projectDir = store.get("projectDir") || ""; // Variable to store the project directory path
+console.log(projectDir);
 
 const createWindow = () => {
 	ipcMain.handle("change-size", (event, data) => {
@@ -369,7 +370,7 @@ const createWindow = () => {
 	floatingWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 	floatingWindow.setBackgroundColor("#f1f1f1");
 	floatingWindow.webContents.on("did-finish-load", () => {
-		floatingWindow.webContents.openDevTools();
+		//floatingWindow.webContents.openDevTools();
 
 		// send event to renderer
 		if (projectDir) {

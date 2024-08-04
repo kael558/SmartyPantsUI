@@ -29,19 +29,23 @@ function handleError(operation, error) {
 
 async function sendEventAndHandleResponse(operation, channel, data, cb) {
 	handleOperation(operation);
+    try {
+        // the response is always wrapped in success & data or error
+        const response = await window.electron.sendEventAsync(channel, data);
 
-	// the response is always wrapped in success & data or error
-	const response = await window.electron.sendEventAsync(channel, data);
-
-	if ("success" in response) {
-		// Do something
-		cb && cb(response.data);
-		handleSuccess(channel);
-	} else {
-		// display error
-		console.error("Error:", response.error);
-		handleError(channel, response.error);
-	}
+        if ("success" in response) {
+            // Do something
+            cb && cb(response.data);
+            handleSuccess(channel);
+        } else {
+            // display error
+            console.error("Error:", response.error);
+            handleError(channel, response.error);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        handleError(channel, error);
+    }
 }
 
 async function saveEdit() {
@@ -105,7 +109,7 @@ async function submitProjectDir() {
 		await sendEventAndHandleResponse(
 			"Setting project directory...",
 			"set-project-dir",
-			{ projectDir },
+			projectDir,
 			(response) => {
 				document.getElementById(
 					"project-display"
