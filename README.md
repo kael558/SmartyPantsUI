@@ -73,10 +73,10 @@ The current main features in the Development Environment are:
 ## 📅 Roadmap
 - [x] Initial POC
 - [ ] Fix the fact that stylesheet is sometimes not included
-- [ ] Extra instructions
-- [ ] Add open dev tools
-- [ ] Add reload and url input
-- [ ] Add ACE editor
+- [ ] Hook up the following:
+-- [ ] Extra instructions
+-- [ ] Add open dev tools
+-- [ ] Add reload and url input
 - [ ] 
 - [ ] Project aware styling
 - [ ] Handling re-use of components

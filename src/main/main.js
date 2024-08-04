@@ -1,166 +1,22 @@
 import { app, BrowserWindow, ipcMain, WebContentsView, screen } from "electron";
 import path from "node:path";
 import fs from "fs";
-import axios from "axios";
 import Store from "electron-store";
-import { fileURLToPath } from "url";
+
 import { exec } from "node:child_process";
 import { wrapError, wrapSuccess } from "./helpers";
 import { promisify } from "util";
 import { newComponent, editComponent } from "./api_interface";
 
-const writeFileAsync = promisify(writeFile);
-const readFileAsync = promisify(readFile);
+const writeFileAsync = promisify(fs.writeFile);
+const readFileAsync = promisify(fs.readFile);
 const statAsync = promisify(fs.stat);
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const store = new Store();
 
 let projectDir = store.get("projectDir") || ""; // Variable to store the project directory path
 
 const createWindow = () => {
-	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-
-	const win = new BrowserWindow({
-		width,
-		height,
-		transparent: true,
-		webPreferences: {
-			preload: path.join(__dirname, "preload.js"),
-			nodeIntegration: true,
-			contextIsolation: true,
-		},
-		backgroundColor: "gray",
-		frame: false,
-	});
-
-	win.setMenuBarVisibility(false);
-	win.maximize();
-
-	const view = new WebContentsView({
-		webPreferences: {
-			preload: path.join(__dirname, "preload.js"),
-			contextIsolation: true,
-			nodeIntegration: false,
-			backgroundThrottling: false,
-		},
-	});
-	win.contentView.addChildView(view);
-	view.webContents.loadURL("http://localhost:8100");
-	view.setBounds({ x: 0, y: 0, width: width, height });
-
-	const toggleEditMode = async () => {
-		try {
-			await view.webContents.executeJavaScript(`
-				if (window.persistentHandlers && window.persistentHandlers.length > 0) {
-					window.persistentHandlers.forEach(item => {
-						item.element.removeEventListener("mouseover", item.handlers.mouseover);
-						item.element.removeEventListener("mouseout", item.handlers.mouseout);
-						item.element.removeEventListener("click", item.handlers.click);
-					});
-
-					if (window.element){
-						window.element.style.backgroundColor = window.originalBackgroundColor;
-					}
-					
-
-					// Clear the handlers array after removing event listeners
-					window.persistentHandlers = [];
-				} else {
-					window.persistentHandlers = [];
-					window.element = null;
-					try {
-						const content = document.querySelector("body");
-						content.querySelectorAll("*").forEach((element) => {
-							let elementHandlers = {
-								mouseover: function(e) {
-									e.stopPropagation();
-									e.preventDefault();
-									window.element = this;
-									window.originalBackgroundColor = this.style.backgroundColor;
-									this.style.backgroundColor = "rgba(255, 165, 0)";
-								},
-								mouseout: function(e) {
-									e.stopPropagation();
-									e.preventDefault();
-									this.style.backgroundColor = window.originalBackgroundColor;
-									window.element = null;
-								},
-								click: function(e) {
-									e.stopPropagation();
-									e.preventDefault();
-									let targetElement = e.target;
-									while (targetElement && !targetElement.hasAttribute('data-component')) {
-										targetElement = targetElement.parentElement;
-									}
-									if (targetElement && targetElement.hasAttribute('data-component')) {
-										const dataComponentValue = targetElement.getAttribute('data-component');
-										window.electron.sendEvent("click-event", { component: dataComponentValue });
-									}
-								}
-							};
-				
-							element.addEventListener("mouseover", elementHandlers.mouseover);
-							element.addEventListener("mouseout", elementHandlers.mouseout);
-							element.addEventListener("click", elementHandlers.click);
-				
-							window.persistentHandlers.push({element: element, handlers: elementHandlers});
-						});
-					} catch (error) {
-						console.error(error);
-					}
-				}
-			`);
-			return wrapSuccess(null);
-		} catch (error) {
-			console.error("Error toggling edit mode:", error);
-			return wrapError(error);
-		}
-	};
-
-	view.webContents.on("did-finish-load", () => {
-		// add an on hover to all the elements
-		toggleEditMode();
-	});
-
-	const floatingWindow = new BrowserWindow({
-		width: 400,
-		height: 700,
-		frame: true,
-		transparent: false,
-		focusable: true,
-		alwaysOnTop: true,
-
-		webPreferences: {
-			preload: path.join(__dirname, "preload.js"),
-			contextIsolation: true,
-			nodeIntegration: false,
-		},
-	});
-
-	floatingWindow.on("closed", () => {
-		app.quit();
-	});
-
-	floatingWindow.setMenuBarVisibility(false);
-	floatingWindow.loadFile(path.join(__dirname, "index.html"));
-	floatingWindow.setBackgroundColor("#f1f1f1");
-	floatingWindow.webContents.on("did-finish-load", () => {
-		//floatingWindow.webContents.openDevTools();
-
-		// send event to renderer
-		if (projectDir) {
-			console.log("Setting project directory:", projectDir);
-			// send to floating window
-			floatingWindow.webContents.send("set-value", {
-				key: "project-dir",
-				value: projectDir,
-			});
-		}
-	});
-
 	ipcMain.handle("change-size", (event, data) => {
 		console.log("Changing size:", data);
 		const { device } = data;
@@ -211,7 +67,11 @@ const createWindow = () => {
 		const componentContent = await readFileAsync(filepath, "utf8");
 		const stylesheetContent = await readFileAsync(csspath, "utf8");
 
-		const response = await editComponent(requested_change, componentContent, stylesheetContent);
+		const response = await editComponent(
+			requested_change,
+			componentContent,
+			stylesheetContent
+		);
 
 		const text = response.data.outputs[0].outputs[0].results.text.data.text;
 
@@ -314,13 +174,10 @@ const createWindow = () => {
 		}
 	});
 
-	
-	ipcMain.handle("toggle-edit-mode", async (event, data) => {
-		return await toggleEditMode();
-	});
-
-	// Listen for events from development view 
+	// Listen for events from development view
 	ipcMain.on("click-event", async (event, data) => {
+		console.log("Component selected:", data.component);
+
 		if (!projectDir) {
 			console.error("Project directory not set");
 			event.reply("component-selected", { error: "Project directory not set" });
@@ -335,21 +192,20 @@ const createWindow = () => {
 			// Check if the file exists
 			await statAsync(filePath);
 			console.log("File exists:", filePath);
-	
+
 			// Read the file content
 			const data = await readFileAsync(filePath, "utf8");
 			console.log("Filepath:", filePath);
-	
+
 			// Send back that the file exists, its path, and its content
 			floatingWindow.webContents.send("component-selected", {
 				exists: true,
 				path: filePath,
 				content: data,
 			});
-
 		} catch (err) {
 			console.error("Error accessing file:", err);
-			
+
 			floatingWindow.webContents.send("component-selected", {
 				exists: false,
 				path: filePath,
@@ -380,6 +236,150 @@ const createWindow = () => {
 
 		// just say it was successful for now
 		return wrapSuccess(null);
+	});
+
+	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+	const win = new BrowserWindow({
+		width,
+		height,
+		transparent: true,
+		webPreferences: {
+			preload: path.join(__dirname, "../preload/preload.mjs"),
+			nodeIntegration: true,
+			contextIsolation: true,
+		},
+		backgroundColor: "gray",
+		frame: false,
+	});
+
+	win.setMenuBarVisibility(false);
+	win.maximize();
+
+	const view = new WebContentsView({
+		webPreferences: {
+			preload: path.join(__dirname, "../preload/preload.mjs"),
+			contextIsolation: true,
+			nodeIntegration: true,
+			backgroundThrottling: false,
+		},
+	});
+	win.contentView.addChildView(view);
+	view.webContents.loadURL("http://localhost:8100");
+	view.setBounds({ x: 0, y: 0, width: width, height });
+
+	const toggleEditMode = async () => {
+		try {
+			await view.webContents.executeJavaScript(`
+				if (window.persistentHandlers && window.persistentHandlers.length > 0) {
+					window.persistentHandlers.forEach(item => {
+						item.element.removeEventListener("mouseover", item.handlers.mouseover);
+						item.element.removeEventListener("mouseout", item.handlers.mouseout);
+						item.element.removeEventListener("click", item.handlers.click);
+					});
+
+					if (window.element){
+						window.element.style.backgroundColor = window.originalBackgroundColor;
+					}
+					
+
+					// Clear the handlers array after removing event listeners
+					window.persistentHandlers = [];
+				} else {
+					window.persistentHandlers = [];
+					window.element = null;
+					try {
+						const content = document.querySelector("body");
+						content.querySelectorAll("*").forEach((element) => {
+							let elementHandlers = {
+								mouseover: function(e) {
+									e.stopPropagation();
+									e.preventDefault();
+									window.element = this;
+									window.originalBackgroundColor = this.style.backgroundColor;
+									this.style.backgroundColor = "rgba(255, 165, 0)";
+								},
+								mouseout: function(e) {
+									e.stopPropagation();
+									e.preventDefault();
+									this.style.backgroundColor = window.originalBackgroundColor;
+									window.element = null;
+								},
+								click: function(e) {
+									e.stopPropagation();
+									e.preventDefault();
+									let targetElement = e.target;
+									while (targetElement && !targetElement.hasAttribute('data-component')) {
+										targetElement = targetElement.parentElement;
+									}
+									if (targetElement && targetElement.hasAttribute('data-component')) {
+										const dataComponentValue = targetElement.getAttribute('data-component');
+										window.electron.sendEvent("click-event", { component: dataComponentValue });
+									}
+								}
+							};
+				
+							element.addEventListener("mouseover", elementHandlers.mouseover);
+							element.addEventListener("mouseout", elementHandlers.mouseout);
+							element.addEventListener("click", elementHandlers.click);
+				
+							window.persistentHandlers.push({element: element, handlers: elementHandlers});
+						});
+					} catch (error) {
+						console.error(error);
+					}
+				}
+			`);
+			return wrapSuccess(null);
+		} catch (error) {
+			console.error("Error toggling edit mode:", error);
+			return wrapError(error);
+		}
+	};
+
+	ipcMain.handle("toggle-edit-mode", async (event, data) => {
+		return await toggleEditMode();
+	});
+
+	view.webContents.on("did-finish-load", () => {
+		// add an on hover to all the elements
+		toggleEditMode();
+	});
+
+	const floatingWindow = new BrowserWindow({
+		width: 400,
+		height: 700,
+		frame: true,
+		transparent: false,
+		focusable: true,
+		alwaysOnTop: true,
+
+		webPreferences: {
+			preload: path.join(__dirname, "../preload/preload.mjs"),
+			contextIsolation: true,
+			nodeIntegration: true,
+		},
+	});
+
+	floatingWindow.on("closed", () => {
+		app.quit();
+	});
+
+	floatingWindow.setMenuBarVisibility(false);
+	floatingWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
+	floatingWindow.setBackgroundColor("#f1f1f1");
+	floatingWindow.webContents.on("did-finish-load", () => {
+		floatingWindow.webContents.openDevTools();
+
+		// send event to renderer
+		if (projectDir) {
+			console.log("Setting project directory:", projectDir);
+			// send to floating window
+			floatingWindow.webContents.send("set-value", {
+				key: "project-dir",
+				value: projectDir,
+			});
+		}
 	});
 };
 

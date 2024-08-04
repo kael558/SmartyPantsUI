@@ -3,72 +3,92 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta
-			http-equiv="Content-Security-Policy"
-			content="default-src 'self'; frame-src 'self' http://localhost:3000; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
-		/>
+
 		<title>SmartyPants UI</title>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		/>
+		<link
+			href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap"
+			rel="stylesheet"
+		/>
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
-		<div id="editor-container">
-			
-	
+		<div id="floating-window">
 
-				<div class="button-container">
-					<button id="undo-btn" onclick="undoAction()">Undo</button>
-					<button id="redo-btn" onclick="redoAction()">Redo</button>
-				</div>
+			<div class="input-container">
+				<input
+					type="text"
+					id="project-dir-input"
+					placeholder="Enter project directory"
+				/>
+				<button class="submit-btn" id="project-dir-submit-btn"><i class="fas fa-check"></i></button>
+			</div>
+			<div id="project-display-container" >
+				<i class="fas fa-folder-open"></i><span id="project-display">Project: None</span>
+			</div>
 
-				<div style="margin: 10px 0">
-					<input
-						type="text"
-						id="project-dir-input"
-						placeholder="Enter project directory"
-					/>
-					<button onclick="submitProjectDir()">Submit</button>
-				</div>
-				<div id="project-display">Project Directory: None</div>
-
-				<div id="component-display">Component: None</div>
-
-				<button id="toggle-code-btn" onclick="toggleCodeEditor()">
-					Show/Hide Code
-				</button>
-
-				<span class="button-container">
-					<input type="text" id="text-input" placeholder="Enter text here" />
-					<button onclick="sendInput('edit')">Edit</button>
-					<button onclick="sendInput('new')">Make New</button>
-				</span>
-
-				<span class="button-container">
-					<button id="mobile-btn" onclick="simulateSize('mobile')">
-						Mobile
+			<div class="top-controls">
+				<div class="device-dropdown">
+					<button class="device-btn dropdown-toggle" type="button" id="deviceDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+						<i class="fas fa-mobile-alt"></i>
 					</button>
-					<button id="tablet-btn" onclick="simulateSize('tablet')">
-						Tablet
-					</button>
-					<button id="pc-btn" onclick="simulateSize('pc')">PC</button>
-				</span>
-
-				<button id="edit-btn" onclick="toggleEditMode()">
-					Toggle Edit Mode
-				</button>
-
-				<div id="status-bar" style="position: fixed; bottom: 0; width: 100%; background: lightgray; padding: 10px; text-align: center;">
-					<i id="status-icon" class=""></i>
-					Status: <span id="status-message">Ready</span>
+					<div class="dropdown-menu" aria-labelledby="deviceDropdown">
+						<a class="dropdown-item" href="#" data-device="mobile"><i class="fas fa-mobile-alt"></i> Mobile</a>
+						<a class="dropdown-item" href="#" data-device="tablet"><i class="fas fa-tablet-alt"></i> Tablet</a>
+						<a class="dropdown-item" href="#" data-device="pc"><i class="fas fa-desktop"></i> PC</a>
+					</div>
 				</div>
-				
+				<button id="open-dev-tools" class="action-btn">Open Dev Tools</button>
+				<button id="toggle-fullscreen" class="action-btn">Update Instructions</button>
+				<button id="reload-btn" class="action-btn"><i class="fas fa-sync-alt"></i></button>
+				<button id="undo-btn" class="action-btn"><i class="fas fa-undo"></i></button>
+				<button id="redo-btn" class="action-btn"><i class="fas fa-redo"></i></button>
+			</div>
 
+			<div class="input-container">
+				<input
+					type="text"
+					id="url-input"
+					placeholder="Enter URL"
+				/>
+				<button class="submit-btn" id="set-url-submit-btn"><i class="fas fa-check"></i></button>
+			</div>
 
-			
-
-		
+			<div id="component-display">
+				<i class="fas fa-puzzle-piece"></i> Component: None
+			</div>
+			<textarea
+				id="text-input"
+				placeholder="Write your requested changes here..."
+			></textarea>
+			<div class="button-container">
+				<button class="action-btn full-width" id="edit-component-btn">
+					<i class="fas fa-edit"></i> Edit
+				</button>
+				<button class="action-btn full-width" id="new-component-btn">
+					<i class="fas fa-plus"></i> Make New
+				</button>
+			</div>
+			<button id="edit-btn" class="action-btn">
+				<i class="fas fa-pencil-alt"></i> Toggle Edit Mode
+			</button>
+			<div id="status-bar">
+				<i id="status-icon" class="fas fa-info-circle"></i>
+				Status: <span id="status-message">Ready</span>
+			</div>
+		</div>
+		<div id="fullscreen-edit" style="display: none;">
+			<div class="fullscreen-controls">
+				<button id="back-btn" class="action-btn">Back</button>
+				<button id="update-btn" class="action-btn">Update</button>
+			</div>
+			<textarea id="prompt-instructions"></textarea>
 		</div>
 
-		<script src="drag.js"></script>
-		<script src="index.js"></script>
+	
+		<script type="module" src="index.js"></script>
 	</body>
 </html>
