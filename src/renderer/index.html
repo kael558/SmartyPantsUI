@@ -16,8 +16,8 @@
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
-		<div id="floating-window">
-			<div id="project-dir-container" class="centered-container">
+		<div id="project-dir-page" class="page centered" style="display: none;">
+			<div class="input-container">
 				<input
 					type="text"
 					id="project-dir-input"
@@ -27,108 +27,121 @@
 					<i class="fas fa-check"></i>
 				</button>
 			</div>
+		</div>
 
-			<div id="main-ui" style="display: none">
-				<!-- Header with project directory edit -->
-				<div class="header">
-					<input type="text" id="current-project-dir" readonly />
-					<button id="edit-project-dir-btn" class="action-btn">
-						<i class="fas fa-edit"></i>
-					</button>
-				</div>
-
-				<!-- Dropdown menus -->
-				<div class="dropdown-container">
-					<!-- Edit Dropdown -->
-					<div class="dropdown"  id="edit-dropdown">
-						<button class="dropbtn">Edit</button>
-						<div class="dropdown-content">
-							<a href="#" id="undo-btn"><i class="fas fa-undo"></i> Undo</a>
-							<a href="#" id="redo-btn"><i class="fas fa-redo"></i> Redo</a>
-						</div>
-					</div>
-
-					<!-- Layout Dropdown -->
-					<div class="dropdown"  id="layout-dropdown">
-						<button class="dropbtn">Layout</button>
-						<div class="dropdown-content">
-							<a href="#" data-device="mobile"
-								><i class="fas fa-mobile-alt"></i> Mobile</a
-							>
-							<a href="#" data-device="tablet"
-								><i class="fas fa-tablet-alt"></i> Tablet</a
-							>
-							<a href="#" data-device="pc"><i class="fas fa-desktop"></i> PC</a>
-							<a href="#" id="rotate-btn"
-								><i class="fas fa-sync-alt"></i> Rotate</a
-							>
-						</div>
-					</div>
-
-					<!-- Options Dropdown -->
-					<div class="dropdown" id="options-dropdown">
-						<button class="dropbtn">Options</button>
-						<div class="dropdown-content">
-							<a href="#" id="open-dev-tools">Open Dev Tools</a>
-							<a href="#" id="update-prompt">Update Prompt</a>
-							<a href="#" id="enter-url">Enter URL</a>
-						</div>
+		<div id="main-page" class="page" style="display:block" >
+		
+			
+			<!-- Toolbar with dropdown menus -->
+			<div class="toolbar">
+				<!-- Edit Dropdown -->
+				<div class="dropdown" id="edit-dropdown">
+					<button class="toolbar-btn">Edit</button>
+					<div class="dropdown-content">
+						<a href="#" id="undo-btn"><i class="fas fa-undo"></i> Undo</a>
+						<a href="#" id="redo-btn"><i class="fas fa-redo"></i> Redo</a>
 					</div>
 				</div>
-
-				<!-- Text area and buttons -->
-				<textarea
-					id="text-input"
-					placeholder="Write your requested changes here..."
-				></textarea>
-				<div class="button-container">
-					<button class="action-btn" id="edit-component-btn">
-						<i class="fas fa-edit"></i> Edit
-					</button>
-					<button class="action-btn" id="new-component-btn">
-						<i class="fas fa-plus"></i> Make New
-					</button>
-					<button class="action-btn" id="toggle-edit-mode-btn">
-						<i class="fas fa-pencil-alt"></i> Toggle Edit Mode
-					</button>
+			
+				<!-- Layout Dropdown -->
+				<div class="dropdown" id="layout-dropdown">
+					<button class="toolbar-btn">Layout</button>
+					<div class="dropdown-content">
+						<a href="#" data-device="mobile"><i class="fas fa-mobile-alt"></i> Mobile</a>
+						<a href="#" data-device="tablet"><i class="fas fa-tablet-alt"></i> Tablet</a>
+						<a href="#" data-device="pc"><i class="fas fa-desktop"></i> PC</a>
+						<a href="#" id="rotate-btn"><i class="fas fa-sync-alt"></i> Rotate</a>
+					</div>
 				</div>
-
-				<!-- Component Display -->
-				<div id="component-display">
-					<i class="fas fa-puzzle-piece"></i> Component:
-					<span id="current-component">None</span>
-				</div>
-
-				<!-- Status Bar -->
-				<div id="status-bar">
-					<i id="status-icon" class="fas fa-info-circle"></i>
-					Status: <span id="status-message">Ready</span>
+			
+				<!-- Options Dropdown -->
+				<div class="dropdown" id="options-dropdown">
+					<button class="toolbar-btn">Options</button>
+					<div class="dropdown-content">
+						<a href="#" id="open-dev-tools">Open Dev Tools</a>
+						<a href="#" id="open-prompt-page">Update Prompt</a>
+						<a href="#" id="enter-url">Enter URL</a>
+						<a href="#" id="reload-btn">Reload Page</a>
+						<a href="#" id="set-project-dir">Set Project Directory</a>
+					</div>
 				</div>
 			</div>
+
+			<!-- Component Display -->
+			<div id="component-display">
+				<div class="flex-center">
+					<i class="fas fa-puzzle-piece"></i> 
+					<h4 style="margin-left: 10px;">Component:</h4>
+					<p class="left-ellipsis"><span id="current-component" class="left-ellipsis">None</span></p>
+		
+				</div>
+
+				<button id="open-component-btn" class="action-btn">
+					<i class="fas fa-eye"></i>
+				</button>
+			</div>
+
+			
+
+			<!-- Text area and buttons -->
+			<textarea
+				id="text-input"
+				placeholder="Write your requested changes here..."
+			></textarea>
+			<div class="button-container">
+				<button class="action-btn" id="edit-component-btn">
+					<i class="fas fa-edit"></i> Edit
+				</button>
+				<button class="action-btn" id="new-component-btn">
+					<i class="fas fa-plus"></i> Make New
+				</button>
+			</div>
+			<div style="text-align: center;"> <!-- Wrapper for centering the toggle button -->
+				<button class="action-btn" id="toggle-edit-mode-btn">
+					<i class="fas fa-pencil-alt"></i> Toggle Edit Mode
+				</button>
+			</div>
+			
 		</div>
-		<div id="fullscreen-edit" style="display: none">
-			<div class="fullscreen-controls">
-				<button id="back-btn" class="action-btn">Back</button>
-				<button id="update-btn" class="action-btn">Update</button>
-				<button id="new-component-prompt-tab" class="action-btn">
-					New Component
-				</button>
-				<button id="edit-component-prompt-tab" class="action-btn">
-					Edit Prompt
-				</button>
+
+		<div id="prompt-page" class="page">
+			<div class="toolbar">
+				<button class="back-to-main-btn action-btn">Back</button>
+				<div class="tabs">
+					<button id="new-component-tab" class="tab-btn active">New Component</button>
+					<button id="edit-component-tab" class="tab-btn">Edit Component</button>
+				</div>
+				<button id="update-btn" class="action-btn">Save</button>
 			</div>
 			<textarea id="prompt-instructions"></textarea>
 		</div>
 
-		<div id="url-input-page" style="display: none">
-			<input type="text" id="url-input" placeholder="Enter URL" />
-			<button id="submit-url-btn" class="submit-btn">
-				<i class="fas fa-check"></i>
-			</button>
-			<button id="back-to-main-btn" class="action-btn">
-				<i class="fas fa-arrow-left"></i> Back
-			</button>
+		<div id="url-input-page" class="page centered" style="display: none;">
+			<button class="back-to-main-btn action-btn">Back</button>
+
+			<div class="input-container">
+				<input
+					type="text"
+					id="url-input"
+					placeholder="Enter URL"
+				/>
+				<button id="submit-url-btn" class="submit-btn">
+					<i class="fas fa-check"></i>
+				</button>
+			</div>
 		</div>
+
+
+	
+
+		<!-- Status Bar -->
+		<div id="status-bar">
+			<i id="status-icon" class="fas fa-info-circle"></i>
+			Status: <span id="status-message">Ready</span>
+		</div>
+
+		<script src="utils.js"></script>
+		<script src="dropdowns.js"></script>
 
 		<script src="index.js"></script>
 	</body>

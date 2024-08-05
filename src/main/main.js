@@ -15,7 +15,7 @@ const statAsync = promisify(fs.stat);
 const store = new Store();
 
 let projectDir = store.get("projectDir") || ""; // Variable to store the project directory path
-console.log(projectDir);
+
 
 const createWindow = () => {
 	ipcMain.handle("change-size", (event, data) => {
@@ -216,9 +216,16 @@ const createWindow = () => {
 	});
 
 	ipcMain.handle("set-project-dir", (event, path) => {
+		// Check if the path exists
+		if (!fs.existsSync(path)) {
+			console.error("Path does not exist:", path);
+			return wrapError("Path does not exist");
+		}
+
 		projectDir = path; // Set the project directory
 		store.set("projectDir", path); // Save the project directory
 		console.log("Project directory set:", path);
+		floatingWindow.setTitle(`${path.substr(path.lastIndexOf("/") + 1)}`);
 		//getComponents();
 		return wrapSuccess(null);
 	});
@@ -347,6 +354,8 @@ const createWindow = () => {
 		toggleEditMode();
 	});
 
+	const title = projectDir ? `${projectDir.substr(projectDir.lastIndexOf("/") + 1)}` : "SmartyPants UI";
+
 	const floatingWindow = new BrowserWindow({
 		width: 400,
 		height: 700,
@@ -354,6 +363,8 @@ const createWindow = () => {
 		transparent: false,
 		focusable: true,
 		alwaysOnTop: true,
+		title,
+		icon: path.join(__dirname, "../assets/icon.png"),
 
 		webPreferences: {
 			preload: path.join(__dirname, "../preload/preload.mjs"),
@@ -374,6 +385,7 @@ const createWindow = () => {
 
 		// send event to renderer
 		if (projectDir) {
+			
 			console.log("Setting project directory:", projectDir);
 			// send to floating window
 			floatingWindow.webContents.send("set-value", {
