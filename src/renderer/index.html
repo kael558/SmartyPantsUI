@@ -16,8 +16,12 @@
 		<link rel="stylesheet" href="styles.css" />
 	</head>
 	<body>
-		<div id="project-dir-page" class="page centered" style="display: none;">
-			<div class="input-container">
+		<div id="project-dir-page" class="page ">
+			<div class="toolbar">
+				<button class="back-to-main-btn action-btn">Back</button>
+			</div>
+
+			<div class="input-container centered">
 				<input
 					type="text"
 					id="project-dir-input"
@@ -29,7 +33,7 @@
 			</div>
 		</div>
 
-		<div id="main-page" class="page" style="display:block" >
+		<div id="main-page" class="page" style="display:none" >
 		
 			
 			<!-- Toolbar with dropdown menus -->
@@ -104,7 +108,7 @@
 			
 		</div>
 
-		<div id="prompt-page" class="page">
+		<div id="prompt-page" class="page" style="display: none;">
 			<div class="toolbar">
 				<button class="back-to-main-btn action-btn">Back</button>
 				<div class="tabs">
@@ -116,10 +120,13 @@
 			<textarea id="prompt-instructions"></textarea>
 		</div>
 
-		<div id="url-input-page" class="page centered" style="display: none;">
-			<button class="back-to-main-btn action-btn">Back</button>
+		<div id="url-input-page" class="page" style="display: none;">
+			<div class="toolbar">
+				<button class="back-to-main-btn action-btn">Back</button>
+			</div>
 
-			<div class="input-container">
+
+			<div class="page input-container centered">
 				<input
 					type="text"
 					id="url-input"
@@ -140,9 +147,9 @@
 			Status: <span id="status-message">Ready</span>
 		</div>
 
-		<script src="utils.js"></script>
-		<script src="dropdowns.js"></script>
+		<script type="module" src="utils.js"></script>
+		<script type="module" src="dropdowns.js"></script>
 
-		<script src="index.js"></script>
+		<script type="module" src="index.js"></script>
 	</body>
 </html>

@@ -1,3 +1,9 @@
+import {
+	sendEventAndHandleResponse,
+	handleError,
+	displayPage,
+} from "./utils.js";
+
 let path = "";
 
 async function submitProjectDir() {
@@ -12,16 +18,16 @@ async function submitProjectDir() {
 			(response) => {
 				//document.getElementById("current-project-dir").textContent = projectDir;
 				displayPage("main");
-				
 			}
 		);
 	} else {
 		// Handle empty input or validation errors
-		handleError("set-project-dir", "Please enter a valid project directory path.");
+		handleError(
+			"set-project-dir",
+			"Please enter a valid project directory path."
+		);
 	}
 }
-
-
 
 async function saveEdit() {
 	const content = document.getElementById("code-area").value;
@@ -76,8 +82,6 @@ async function makeNewComponent() {
 	);
 }
 
-
-
 async function toggleEditMode() {
 	await sendEventAndHandleResponse(
 		"Toggling edit mode...",
@@ -92,7 +96,6 @@ async function toggleEditMode() {
 	);
 }
 
-
 async function openVSCode() {
 	await sendEventAndHandleResponse(
 		"Opening...",
@@ -106,56 +109,57 @@ async function openVSCode() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Function to set up input focus
-    function setupInputFocus(inputId) {
-        document.getElementById(inputId).addEventListener("click", () => {
-            document.getElementById(inputId).focus();
-        });
-    }
+	// Function to set up input focus
+	function setupInputFocus(inputId) {
+		document.getElementById(inputId).addEventListener("click", () => {
+			document.getElementById(inputId).focus();
+		});
+	}
 
-    setupInputFocus("project-dir-input");
-    setupInputFocus("text-input");
-    setupInputFocus("url-input");
+	setupInputFocus("project-dir-input");
+	setupInputFocus("text-input");
+	setupInputFocus("url-input");
 
+	// Setup button event listeners
+	document
+		.getElementById("project-dir-submit-btn")
+		.addEventListener("click", submitProjectDir);
+	document
+		.getElementById("edit-component-btn")
+		.addEventListener("click", editComponent);
+	document
+		.getElementById("new-component-btn")
+		.addEventListener("click", makeNewComponent);
+	document
+		.getElementById("toggle-edit-mode-btn")
+		.addEventListener("click", toggleEditMode);
+	document.getElementById("open-component-btn").addEventListener("click", openVSCode);
 
+	// Electron event listeners
+	window.electron.receiveEvent("component-selected", (event, data) => {
+		console.log("Received component-selected:", data);
+		updateComponentDisplay(data);
+	});
 
-    // Setup button event listeners
-    document.getElementById("project-dir-submit-btn").addEventListener("click", submitProjectDir);
-    document.getElementById("edit-component-btn").addEventListener("click", editComponent);
-    document.getElementById("new-component-btn").addEventListener("click", makeNewComponent);
-    document.getElementById("toggle-edit-mode-btn").addEventListener("click", toggleEditMode);
+	window.electron.receiveEvent("project-dir-set", (event, data) => {
+		console.log("Received project-dir-set:", data);
+		displayPage("main");
+	});
 
-    // Electron event listeners
-    /*window.electron.receiveEvent("component-selected", (event, data) => {
-        console.log("Received component-selected:", data);
-        updateComponentDisplay(data);
-    });
-
-    window.electron.receiveEvent("set-value", (event, data) => {
-        console.log("Received set-value:", data);
-        updateProjectDisplay(data);
-    });
-
-    window.electron.receiveEvent("status-update", (event, data) => {
-        console.log("Received status:", data);
-        handleOperation(data);
-    });*/
+	window.electron.receiveEvent("status-update", (event, data) => {
+		console.log("Received status:", data);
+		handleOperation(data);
+	});
 });
 
 function updateComponentDisplay(data) {
-    if (data.exists === false || data.error) {
-        console.error("Error selecting component:", data.error);
-        document.getElementById("component-display").textContent = "Component: No component selected";
-        return;
-    }
+	if (data.exists === false || data.error) {
+		console.error("Error selecting component:", data.error);
+		document.getElementById("current-component").textContent = "None";
+		return;
+	}
 
-    const name = data.path.split("\\").pop();
-    path = data.path;
-    document.getElementById("component-display").textContent = "Component: " + name;
-}
-
-function updateProjectDisplay(data) {
-    if (data.key === "project-dir") {
-        document.getElementById("project-display").textContent = `Project Directory: ${data.value}`;
-    }
+	const name = data.path.split("\\").pop();
+	path = data.path;
+	document.getElementById("current-component").textContent = name;
 }

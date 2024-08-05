@@ -26,9 +26,7 @@ async function sendEventAndHandleResponse(operation, channel, data, cb) {
 	handleOperation(operation);
 	try {
 
-        cb && cb();
-        handleSuccess(channel);
-        return;
+
 
 		// the response is always wrapped in success & data or error
 		const response = await window.electron.sendEventAsync(channel, data);
@@ -58,3 +56,5 @@ function displayPage(page) {
 	document.getElementById("prompt-page").style.display =
 		page === "prompt" ? "block" : "none";
 }
+
+export { sendEventAndHandleResponse, displayPage, handleError };

@@ -5,6 +5,7 @@ html {
 	font-family: "Roboto", sans-serif;
 	background-color: #1a1a2e;
 	color: #e94560;
+	overflow-y: hidden;
 }
 .page {
 	width: 100%;
@@ -353,6 +354,7 @@ textarea {
 #prompt-instructions {
     flex-grow: 1;
     width: 100%;
+	height: fit-content;
     background-color: #16213e;
     color: #e94560;
     border: none;

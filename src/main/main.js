@@ -16,7 +16,6 @@ const store = new Store();
 
 let projectDir = store.get("projectDir") || ""; // Variable to store the project directory path
 
-
 const createWindow = () => {
 	ipcMain.handle("change-size", (event, data) => {
 		console.log("Changing size:", data);
@@ -225,7 +224,7 @@ const createWindow = () => {
 		projectDir = path; // Set the project directory
 		store.set("projectDir", path); // Save the project directory
 		console.log("Project directory set:", path);
-		floatingWindow.setTitle(`${path.substr(path.lastIndexOf("/") + 1)}`);
+		floatingWindow.setTitle(`${path.substr(path.lastIndexOf("\\") + 1)}`);
 		//getComponents();
 		return wrapSuccess(null);
 	});
@@ -354,8 +353,6 @@ const createWindow = () => {
 		toggleEditMode();
 	});
 
-	const title = projectDir ? `${projectDir.substr(projectDir.lastIndexOf("/") + 1)}` : "SmartyPants UI";
-
 	const floatingWindow = new BrowserWindow({
 		width: 400,
 		height: 700,
@@ -363,7 +360,7 @@ const createWindow = () => {
 		transparent: false,
 		focusable: true,
 		alwaysOnTop: true,
-		title,
+		title: "SmartyPants UI",
 		icon: path.join(__dirname, "../assets/icon.png"),
 
 		webPreferences: {
@@ -381,17 +378,15 @@ const createWindow = () => {
 	floatingWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 	floatingWindow.setBackgroundColor("#f1f1f1");
 	floatingWindow.webContents.on("did-finish-load", () => {
-		//floatingWindow.webContents.openDevTools();
+		floatingWindow.webContents.openDevTools();
 
 		// send event to renderer
 		if (projectDir) {
-			
-			console.log("Setting project directory:", projectDir);
-			// send to floating window
-			floatingWindow.webContents.send("set-value", {
-				key: "project-dir",
-				value: projectDir,
-			});
+			floatingWindow.setTitle(
+				`${projectDir.substr(projectDir.lastIndexOf("\\") + 1)}`
+			);
+			console.log("Project directory set:", projectDir);
+			floatingWindow.webContents.send("project-dir-set", { projectDir });
 		}
 	});
 };
