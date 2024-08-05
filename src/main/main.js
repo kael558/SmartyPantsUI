@@ -6,7 +6,7 @@ import Store from "electron-store";
 import { exec } from "node:child_process";
 import { wrapError, wrapSuccess } from "./helpers";
 import { promisify } from "util";
-import { newComponent, editComponent } from "./api_interface";
+import { newComponent, editComponent, newComponentPromptBase, editComponentPromptBase } from "./api_interface";
 
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
@@ -14,7 +14,9 @@ const statAsync = promisify(fs.stat);
 
 const store = new Store();
 
-let projectDir = store.get("projectDir") || ""; // Variable to store the project directory path
+let projectDir = store.get("projectDir", ""); // Variable to store the project directory path
+let newComponentPrompt = store.get("newComponentPrompt", newComponentPromptBase); // Variable to store the new component prompt status
+let editComponentPrompt = store.get("editComponentPrompt", editComponentPromptBase); // Variable to store the edit component prompt status
 
 const createWindow = () => {
 	ipcMain.handle("change-size", (event, data) => {
@@ -245,6 +247,11 @@ const createWindow = () => {
 		return wrapSuccess(null);
 	});
 
+	ipcMain.handle("open-dev-tools", (event, data) => {
+		view.webContents.openDevTools();
+		return wrapSuccess(null);
+	});
+
 	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
 
 	const win = new BrowserWindow({
@@ -360,7 +367,7 @@ const createWindow = () => {
 		transparent: false,
 		focusable: true,
 		alwaysOnTop: true,
-		title: "SmartyPants UI",
+		title: projectDir,
 		icon: path.join(__dirname, "../assets/icon.png"),
 
 		webPreferences: {
@@ -378,16 +385,15 @@ const createWindow = () => {
 	floatingWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 	floatingWindow.setBackgroundColor("#f1f1f1");
 	floatingWindow.webContents.on("did-finish-load", () => {
-		floatingWindow.webContents.openDevTools();
+		//floatingWindow.webContents.openDevTools();
 
+		floatingWindow.webContents.send("set-initial-values", { projectDir, newComponentPrompt, editComponentPrompt });
 		// send event to renderer
-		if (projectDir) {
+		/*if (projectDir) {
 			floatingWindow.setTitle(
 				`${projectDir.substr(projectDir.lastIndexOf("\\") + 1)}`
 			);
-			console.log("Project directory set:", projectDir);
-			floatingWindow.webContents.send("project-dir-set", { projectDir });
-		}
+		}*/
 	});
 };
 

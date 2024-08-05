@@ -5,6 +5,8 @@ import {
 } from "./utils.js";
 
 let path = "";
+let editComponentPrompt = "";
+let newComponentPrompt = "";
 
 async function submitProjectDir() {
 	const input = document.getElementById("project-dir-input");
@@ -108,6 +110,11 @@ async function openVSCode() {
 	);
 }
 
+async function togglePromptInstructions(){
+	// Change the prompt instructions based on the selected mode
+	const prompt = document.getElementById("prompt-instructions");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 	// Function to set up input focus
 	function setupInputFocus(inputId) {
@@ -133,17 +140,26 @@ document.addEventListener("DOMContentLoaded", () => {
 	document
 		.getElementById("toggle-edit-mode-btn")
 		.addEventListener("click", toggleEditMode);
-	document.getElementById("open-component-btn").addEventListener("click", openVSCode);
+	document
+		.getElementById("open-component-btn")
+		.addEventListener("click", openVSCode);
 
 	// Electron event listeners
+	window.electron.receiveEvent("set-initial-values", (event, data) => {
+		if (data.projectDir) {
+			displayPage("main");
+		} else if (data.newComponentPrompt) {
+			newComponentPrompt = data.newComponentPrompt;
+		} else if (data.editComponentPrompt) {
+			editComponentPrompt = data.editComponentPrompt;
+		}
+
+		console.log("Received set-initial-values:", data);
+	});
+
 	window.electron.receiveEvent("component-selected", (event, data) => {
 		console.log("Received component-selected:", data);
 		updateComponentDisplay(data);
-	});
-
-	window.electron.receiveEvent("project-dir-set", (event, data) => {
-		console.log("Received project-dir-set:", data);
-		displayPage("main");
 	});
 
 	window.electron.receiveEvent("status-update", (event, data) => {

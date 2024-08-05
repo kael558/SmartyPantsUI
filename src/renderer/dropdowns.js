@@ -40,10 +40,6 @@ async function openDevTools() {
 
 
 
-function togglePromptInstructions() {
-	const prompt = document.getElementById("fullscreen-edit");
-	prompt.style.display = prompt.style.display === "none" ? "block" : "none";
-}
 
 
 async function setPromptInstructionsForEdit() {
@@ -180,26 +176,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Setup URL input handlers
     document.getElementById("submit-url-btn").addEventListener("click", loadURL);
 
+
+	// Set up back buttons
     document.querySelectorAll(".back-to-main-btn").forEach(item => {
         item.addEventListener("click", (e) => {
             e.preventDefault();
             displayPage("main");
         });
     });
-
-    // Close the dropdowns when clicking outside
-	/*window.addEventListener("click", function (e) {
-		if (!e.target.matches(".dropdown-toggle")) {
-            var dropdowns = document.getElementsByClassName("dropdown-content");
-            for (var i = 0; i < dropdowns.length; i++) {
-                var dropdownMenu = dropdowns[i];
-                if (dropdownMenu.classList.contains("show")) {
-                    dropdownMenu.classList.remove("show");
-                }
-            }
-
-
-			dropdownMenu.classList.remove("show");
-		}
-	});*/
 });
