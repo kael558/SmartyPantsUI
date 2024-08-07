@@ -13,7 +13,7 @@ async function generate(system, messages) {
 		system,
 	});
 
-	return response.content[0].content;
+	return response.content[0].text;
 }
 
 export const editComponentPromptBase =
@@ -22,21 +22,19 @@ export const editComponentPromptBase =
 export async function editComponent(
 	description,
 	component,
-	stylesheet,
+	stylesheet = "No stylesheet provided",
 	prompt
 ) {
+	const system_message = prompt.replace("{component}", component).replace("{stylesheet}", stylesheet);
+
 	const messages = [
-		{
-			role: "system",
-			content: prompt
-		},
 		{
 			role: "user",
 			content: description,
 		},
 	];
 
-	return await generate("edit_component", messages);
+	return await generate(system_message, messages);
 }
 
 export const newComponentPromptBase =
@@ -44,15 +42,12 @@ export const newComponentPromptBase =
 
 export async function newComponent(description, prompt) {
 	const messages = [
-		{
-			role: "system",
-			content: prompt
-		},
+	
 		{
 			role: "user",
 			content: description,
 		},
 	];
 
-	return await generate("new_component", messages);
+	return await generate(prompt, messages);
 }

@@ -1,4 +1,4 @@
-import { sendEventAndHandleResponse, displayPage } from "./utils.js";
+import { sendEventAndHandleResponse, displayPage, handleError} from "./utils.js";
 
 // Edit dropdown options
 function undoAction() {
@@ -19,6 +19,9 @@ async function handleDeviceSelection(device) {
 		(response) => {
 			// Do something
 			console.log("Size changed:", device);
+
+			// TODO set the device name in the dropdown 
+
 		}
 	);
 }
@@ -39,32 +42,6 @@ async function openDevTools() {
 }
 
 
-
-
-
-async function setPromptInstructionsForEdit() {
-	const prompt = document.getElementById("prompt-instructions");
-
-	if (!prompt.value) {
-		alert("Please enter a prompt.");
-		return;
-	}
-
-	await sendEventAndHandleResponse(
-		"Updating prompt...",
-		"set-prompt",
-		{ prompt: prompt.value },
-		(response) => {
-			// Do something
-			console.log("Prompt set:", prompt);
-		}
-	);
-}
-
-
-
-
-
 async function loadURL() {
 	const url = document.getElementById("url-input").value;
 
@@ -76,6 +53,7 @@ async function loadURL() {
 			(response) => {
 				// Do something
 				console.log("URL loaded:", url);
+				displayPage("main");
 			}
 		);
 	} else {
@@ -86,8 +64,7 @@ async function loadURL() {
 
 
 async function reloadPage() {
-    handleError("reload-page", "Not implemented");
-	/*await sendEventAndHandleResponse(
+	await sendEventAndHandleResponse(
 		"Reloading...",
 		"reload-page",
 		null,
@@ -95,7 +72,7 @@ async function reloadPage() {
 			// Do something
 			console.log("Page reloaded");
 		}
-	);*/
+	);
 }
 
 
@@ -138,7 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					handleDeviceSelection(device);
 				} else if (e.target.id === "rotate-btn") {
 					// Implement rotation logic here
-					console.log("Rotate device");
+					handleError("rotate", "Not implemented");
 				}
 			});
 		});

@@ -6,7 +6,12 @@ import Store from "electron-store";
 import { exec } from "node:child_process";
 import { wrapError, wrapSuccess } from "./helpers";
 import { promisify } from "util";
-import { newComponent, editComponent, newComponentPromptBase, editComponentPromptBase } from "./api_interface";
+import {
+	newComponent,
+	editComponent,
+	newComponentPromptBase,
+	editComponentPromptBase,
+} from "./api_interface";
 
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
@@ -14,9 +19,16 @@ const statAsync = promisify(fs.stat);
 
 const store = new Store();
 
+let url = store.get("url", ""); // Variable to store the URL
 let projectDir = store.get("projectDir", ""); // Variable to store the project directory path
-let newComponentPrompt = store.get("newComponentPrompt", newComponentPromptBase); // Variable to store the new component prompt status
-let editComponentPrompt = store.get("editComponentPrompt", editComponentPromptBase); // Variable to store the edit component prompt status
+let newComponentPrompt = store.get(
+	"newComponentPrompt",
+	newComponentPromptBase
+); // Variable to store the new component prompt status
+let editComponentPrompt = store.get(
+	"editComponentPrompt",
+	editComponentPromptBase
+); // Variable to store the edit component prompt status
 
 const createWindow = () => {
 	ipcMain.handle("change-size", (event, data) => {
@@ -47,35 +59,39 @@ const createWindow = () => {
 		const x = Math.round((width - viewWidth) / 2);
 		const y = Math.round((height - viewHeight) / 2);
 
-		translatedX = x;
-		translatedY = y;
-
 		view.setBounds({ x: 0, y: 0, width: viewWidth, height: viewHeight });
 
 		return wrapSuccess(null);
 	});
 
-	ipcMain.handle("save-edit", async (event, data) => {
-		const { path, content } = data;
-		try {
-			await writeFileAsync(path, content, { encoding: "utf-8" });
-			return wrapSuccess(null);
-		} catch (error) {
-			return wrapError(error);
-		}
-	});
-
 	const makeEdits = async (requested_change, filepath, csspath) => {
 		const componentContent = await readFileAsync(filepath, "utf8");
-		const stylesheetContent = await readFileAsync(csspath, "utf8");
+		let stylesheetContent = "";
 
-		const response = await editComponent(
+		// Try to read the CSS file, if it exists
+		try {
+			stylesheetContent = await readFileAsync(csspath, "utf8");
+		} catch (error) {
+			if (error.code === "ENOENT") {
+				console.log(`CSS file not found: ${csspath}. Continuing without it.`);
+			} else {
+				throw error; // Re-throw if it's a different error
+			}
+		}
+
+		const text = await editComponent(
 			requested_change,
 			componentContent,
-			stylesheetContent
+			stylesheetContent,
+			editComponentPrompt
 		);
 
-		const text = response.data.outputs[0].outputs[0].results.text.data.text;
+		console.log("Received text:", text);
+
+		if (!text) {
+			throw new Error("No text received from API");
+		}
+
 
 		// Function to extract sections based on delimiters
 		function extractSection(fullText, sectionStartDelimiter) {
@@ -89,16 +105,20 @@ const createWindow = () => {
 		const updatedReactComponent = extractSection(text, "```jsx");
 		console.log("UPDATED REACT COMPONENT:", updatedReactComponent);
 
-		// Extract UPDATED STYLESHEET
-		const updatedStylesheet = extractSection(text, "```css");
-		console.log("UPDATED STYLESHEET:", updatedStylesheet);
-
-		// Write the updated content to the files
+		// Write the updated content to the React component file
 		await writeFileAsync(filepath, updatedReactComponent);
 		console.log("File saved successfully:", filepath);
 
-		await writeFileAsync(csspath, updatedStylesheet);
-		console.log("File saved successfully:", csspath);
+		// Extract UPDATED STYLESHEET if it exists
+		const updatedStylesheet = extractSection(text, "```css");
+		if (updatedStylesheet) {
+			console.log("UPDATED STYLESHEET:", updatedStylesheet);
+			// Write the updated content to the CSS file
+			await writeFileAsync(csspath, updatedStylesheet);
+			console.log("File saved successfully:", csspath);
+		} else {
+			console.log("No CSS updates were required or provided.");
+		}
 	};
 
 	ipcMain.handle("edit-code", async (event, data) => {
@@ -122,9 +142,13 @@ const createWindow = () => {
 			const filepath = data.path;
 			const csspath = data.path.replace(".tsx", ".css").replace(".jsx", ".css");
 
-			const response = await newComponent(requested_change);
+			const text = await newComponent(requested_change, newComponentPrompt);
 
-			const text = response.data.outputs[0].outputs[0].results.text.data.text;
+			if (!text) {
+				throw new Error("No text received from API");
+			}
+
+			console.log("Received text from new component:", text);
 
 			// Function to extract sections based on delimiters
 			function extractSection(fullText, sectionStartDelimiter) {
@@ -234,7 +258,6 @@ const createWindow = () => {
 	ipcMain.handle("open-vscode-editor", (event, data) => {
 		console.log("Opening code editor for:", data);
 		// open component file in vscode
-		//vscode.window.showTextDocument(vscode.Uri.file(data.path));
 		exec(`code ${data.path}`, (err, stdout, stderr) => {
 			if (err) {
 				console.error("Error opening file in VSCode:", err);
@@ -247,8 +270,38 @@ const createWindow = () => {
 		return wrapSuccess(null);
 	});
 
-	ipcMain.handle("open-dev-tools", (event, data) => {
+	ipcMain.handle("open-devtools", (event, data) => {
 		view.webContents.openDevTools();
+		return wrapSuccess(null);
+	});
+
+	ipcMain.handle("load-url", (event, data) => {
+		try {
+			view.webContents.loadURL(data.url);
+			url = data.url;
+			store.set("url", url);
+			return wrapSuccess(null);
+		} catch (error) {
+			return wrapError(error);
+		}
+	});
+
+	ipcMain.handle("reload-page", (event, data) => {
+		view.webContents.reload();
+		return wrapSuccess(null);
+	});
+
+	ipcMain.handle("set-prompt", (event, data) => {
+		if (data.type === "new-prompt") {
+			newComponentPrompt = data.prompt;
+			store.set("newComponentPrompt", newComponentPrompt);
+		} else if (data.type === "edit-prompt") {
+			editComponentPrompt = data.prompt;
+			store.set("editComponentPrompt", editComponentPrompt);
+		} else {
+			return wrapError("Unknown prompt type");
+		}
+
 		return wrapSuccess(null);
 	});
 
@@ -279,7 +332,11 @@ const createWindow = () => {
 		},
 	});
 	win.contentView.addChildView(view);
-	view.webContents.loadURL("http://localhost:8100");
+
+	if (url) {
+		view.webContents.loadURL(url);
+	}
+
 	view.setBounds({ x: 0, y: 0, width: width, height });
 
 	const toggleEditMode = async () => {
@@ -385,9 +442,13 @@ const createWindow = () => {
 	floatingWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 	floatingWindow.setBackgroundColor("#f1f1f1");
 	floatingWindow.webContents.on("did-finish-load", () => {
-		//floatingWindow.webContents.openDevTools();
+		floatingWindow.webContents.openDevTools();
 
-		floatingWindow.webContents.send("set-initial-values", { projectDir, newComponentPrompt, editComponentPrompt });
+		floatingWindow.webContents.send("set-initial-values", { projectDir, url });
+		floatingWindow.webContents.send("set-prompts", {
+			newComponentPrompt,
+			editComponentPrompt,
+		});
 		// send event to renderer
 		/*if (projectDir) {
 			floatingWindow.setTitle(

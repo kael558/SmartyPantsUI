@@ -5,8 +5,8 @@ import {
 } from "./utils.js";
 
 let path = "";
-let editComponentPrompt = "";
-let newComponentPrompt = "";
+let editMode = true;
+
 
 async function submitProjectDir() {
 	const input = document.getElementById("project-dir-input");
@@ -31,20 +31,6 @@ async function submitProjectDir() {
 	}
 }
 
-async function saveEdit() {
-	const content = document.getElementById("code-area").value;
-	console.log("Saving edit:", path, content);
-
-	await sendEventAndHandleResponse(
-		"Saving...",
-		"save-edit",
-		{ path, content },
-		(response) => {
-			// Do something
-			console.log("Edit saved successfully:", path);
-		}
-	);
-}
 
 async function editComponent() {
 	if (!path) {
@@ -52,15 +38,20 @@ async function editComponent() {
 		return;
 	}
 
-	const input = document.getElementById("text-input").value;
+	const inputElem = document.getElementById("text-input");
+
+	// set readonly
+	inputElem.readOnly = true;
+
 
 	await sendEventAndHandleResponse(
 		"Editing component...",
 		"edit-code",
-		{ input, path },
+		{ input: inputElem.value, path },
 		(response) => {
 			// Do something
-			input.value = ""; // Clear the input field
+			inputElem.value = ""; // Clear the input field
+			inputElem.readOnly = false;
 		}
 	);
 }
@@ -91,9 +82,18 @@ async function toggleEditMode() {
 		null,
 		(response) => {
 			// Do something
-			const elem = document.getElementById("edit-btn");
-			elem.style.backgroundColor =
-				elem.style.backgroundColor === "red" ? "green" : "red";
+			
+			const elem = document.getElementById("toggle-edit-mode-btn");
+			editMode = !editMode;
+			if (editMode) {
+				document.getElementById("edit-mode-text").textContent = "Select Mode: On";
+				elem.style.borderColor = "#2df071";
+				elem.style.color = "#2df071";
+			} else {
+				document.getElementById("edit-mode-text").textContent = "Select Mode: Off";
+				elem.style.borderColor = "#e94560";
+				elem.style.color = "#e94560";
+			}
 		}
 	);
 }
@@ -110,9 +110,12 @@ async function openVSCode() {
 	);
 }
 
-async function togglePromptInstructions(){
-	// Change the prompt instructions based on the selected mode
-	const prompt = document.getElementById("prompt-instructions");
+function undo() {
+	handleError("undo", "Not implemented");
+}
+
+function redo() {
+	handleError("redo", "Not implemented");
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -144,14 +147,20 @@ document.addEventListener("DOMContentLoaded", () => {
 		.getElementById("open-component-btn")
 		.addEventListener("click", openVSCode);
 
+	document.getElementById("undo-btn").addEventListener("click", undo);
+	document.getElementById("redo-btn").addEventListener("click", redo);
+
+	
+	
+
 	// Electron event listeners
 	window.electron.receiveEvent("set-initial-values", (event, data) => {
 		if (data.projectDir) {
 			displayPage("main");
-		} else if (data.newComponentPrompt) {
-			newComponentPrompt = data.newComponentPrompt;
-		} else if (data.editComponentPrompt) {
-			editComponentPrompt = data.editComponentPrompt;
+		} 
+		
+		if (data.url){
+			document.getElementById("url-input").value = data.url;
 		}
 
 		console.log("Received set-initial-values:", data);

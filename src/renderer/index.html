@@ -95,7 +95,7 @@
 			</div>
 			<div class="center-wrapper">
 				<button class="action-btn" id="toggle-edit-mode-btn">
-					<i class="fas fa-pencil-alt"></i> Toggle Edit Mode
+					<i class="fas fa-pencil-alt"></i> <span id="edit-mode-text">Turn Off Edit Mode</span> 
 				</button>
 			</div>
 		</div>
@@ -111,9 +111,11 @@
 						Edit Component
 					</button>
 				</div>
-				<button id="update-btn" class="action-btn">Save</button>
+				<button id="set-prompt-btn" class="action-btn">Save</button>
 			</div>
-			<textarea id="prompt-instructions"></textarea>
+			<textarea id="new-component-prompt-instructions" class="prompt-instructions"></textarea>
+			<textarea id="edit-component-prompt-instructions" class="prompt-instructions" style="display: none;"></textarea>
+			
 		</div>
 
 		<div id="url-input-page" class="page" style="display: none">
@@ -134,6 +136,7 @@
 		</div>
 
 		<script type="module" src="utils.js"></script>
+		<script type="module" src="prompts.js"></script>
 		<script type="module" src="dropdowns.js"></script>
 		<script type="module" src="index.js"></script>
 	</body>
