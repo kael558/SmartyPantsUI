@@ -7,7 +7,6 @@ import {
 let path = "";
 let editMode = true;
 
-
 async function submitProjectDir() {
 	const input = document.getElementById("project-dir-input");
 	const projectDir = input.value.trim(); // Get the trimmed input value
@@ -31,7 +30,6 @@ async function submitProjectDir() {
 	}
 }
 
-
 async function editComponent() {
 	if (!path) {
 		handleError("edit-code", "Please select a component first.");
@@ -42,7 +40,6 @@ async function editComponent() {
 
 	// set readonly
 	inputElem.readOnly = true;
-
 
 	await sendEventAndHandleResponse(
 		"Editing component...",
@@ -82,15 +79,17 @@ async function toggleEditMode() {
 		null,
 		(response) => {
 			// Do something
-			
+
 			const elem = document.getElementById("toggle-edit-mode-btn");
 			editMode = !editMode;
 			if (editMode) {
-				document.getElementById("edit-mode-text").textContent = "Select Mode: On";
+				document.getElementById("edit-mode-text").textContent =
+					"Select Mode: On";
 				elem.style.borderColor = "#2df071";
 				elem.style.color = "#2df071";
 			} else {
-				document.getElementById("edit-mode-text").textContent = "Select Mode: Off";
+				document.getElementById("edit-mode-text").textContent =
+					"Select Mode: Off";
 				elem.style.borderColor = "#e94560";
 				elem.style.color = "#e94560";
 			}
@@ -98,11 +97,19 @@ async function toggleEditMode() {
 	);
 }
 
-async function openVSCode() {
+async function openVSCode(filepath = null) {
+	if (!filepath) {
+		if (!path) {
+			handleError("open-vscode-editor", "Please select a component first.");
+			return;
+		}
+		filepath = path;
+	}
+
 	await sendEventAndHandleResponse(
 		"Opening...",
 		"open-vscode-editor",
-		{ path },
+		{ filepath },
 		(response) => {
 			// Do something
 			console.log("Opening VS Code:", path);
@@ -110,8 +117,26 @@ async function openVSCode() {
 	);
 }
 
-function undo() {
-	handleError("undo", "Not implemented");
+// Function to handle component selection
+async function selectComponent(filePath) {
+	await sendEventAndHandleResponse(
+		"Selecting component...",
+		"select-component",
+		filePath,
+		(response) => {
+			console.log("Selected component:", response);
+			// TODO: Implement component selection logic
+			// This might involve updating the current component display
+			updateComponentDisplay(response);
+		}
+	);
+}
+
+async function undo() {
+	await sendEventAndHandleResponse("Undoing...", "undo", null, (response) => {
+		// Do something
+		console.log("Undoing...");
+	});
 }
 
 function redo() {
@@ -150,16 +175,13 @@ document.addEventListener("DOMContentLoaded", () => {
 	document.getElementById("undo-btn").addEventListener("click", undo);
 	document.getElementById("redo-btn").addEventListener("click", redo);
 
-	
-	
-
 	// Electron event listeners
 	window.electron.receiveEvent("set-initial-values", (event, data) => {
 		if (data.projectDir) {
 			displayPage("main");
-		} 
-		
-		if (data.url){
+		}
+
+		if (data.url) {
 			document.getElementById("url-input").value = data.url;
 		}
 
@@ -169,6 +191,51 @@ document.addEventListener("DOMContentLoaded", () => {
 	window.electron.receiveEvent("component-selected", (event, data) => {
 		console.log("Received component-selected:", data);
 		updateComponentDisplay(data);
+	});
+
+	window.electron.receiveEvent("components", (event, data) => {
+		console.log("Received components:", data);
+
+		console.log(data);
+
+		// Get the component list container
+		const componentList = document.querySelector("#component-list");
+
+		// Clear existing list items
+		componentList.innerHTML = "";
+
+		// Add new components to the list
+		data.forEach((filePath) => {
+			// Extract file name from the path
+			const fileName = filePath.split("/").pop().split("\\").pop();
+
+			// Create new list item
+			const listItem = document.createElement("li");
+			listItem.className = "component-item";
+
+			// Add component name
+			const nameSpan = document.createElement("span");
+			nameSpan.className = "component-name";
+			nameSpan.textContent = fileName;
+			listItem.appendChild(nameSpan);
+
+			// Add select button
+			const selectBtn = document.createElement("button");
+			selectBtn.className = "select-component-btn action-btn";
+			selectBtn.innerHTML = '<i class="fas fa-check"></i>';
+			selectBtn.onclick = () => selectComponent(filePath);
+			listItem.appendChild(selectBtn);
+
+			// Add open button
+			const openBtn = document.createElement("button");
+			openBtn.className = "open-component-btn action-btn";
+			openBtn.innerHTML = '<i class="fas fa-eye"></i>';
+			openBtn.onclick = () => openVSCode(filePath);
+			listItem.appendChild(openBtn);
+
+			// Add the list item to the component list
+			componentList.appendChild(listItem);
+		});
 	});
 
 	window.electron.receiveEvent("status-update", (event, data) => {

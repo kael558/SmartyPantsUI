@@ -30,6 +30,10 @@ let editComponentPrompt = store.get(
 	editComponentPromptBase
 ); // Variable to store the edit component prompt status
 
+const history = [];
+
+let toggleEditModeValue = true;
+
 const createWindow = () => {
 	ipcMain.handle("change-size", (event, data) => {
 		console.log("Changing size:", data);
@@ -92,7 +96,6 @@ const createWindow = () => {
 			throw new Error("No text received from API");
 		}
 
-
 		// Function to extract sections based on delimiters
 		function extractSection(fullText, sectionStartDelimiter) {
 			const startIndex =
@@ -119,6 +122,16 @@ const createWindow = () => {
 		} else {
 			console.log("No CSS updates were required or provided.");
 		}
+
+		const action = {
+			type: "edit",
+			filepath: filepath,
+			componentContent: componentContent,
+			csspath: csspath,
+			stylesheetContent: stylesheetContent,
+		};
+
+		history.push(action);
 	};
 
 	ipcMain.handle("edit-code", async (event, data) => {
@@ -128,6 +141,7 @@ const createWindow = () => {
 			const csspath = data.path.replace(".tsx", ".css").replace(".jsx", ".css");
 
 			await makeEdits(requested_change, filepath, csspath);
+			await toggleEditMode();
 			return wrapSuccess(null);
 		} catch (error) {
 			console.error("Error editing code:", error);
@@ -200,19 +214,35 @@ const createWindow = () => {
 		}
 	});
 
-	// Listen for events from development view
-	ipcMain.on("click-event", async (event, data) => {
-		console.log("Component selected:", data.component);
-
-		if (!projectDir) {
-			console.error("Project directory not set");
-			event.reply("component-selected", { error: "Project directory not set" });
-			return;
+	ipcMain.handle("undo", async (event, data) => {
+		if (history.length === 0) {
+			return wrapError("No actions to undo");
 		}
 
-		// Use fs to locate the file
-		const filePath = data.component;
+		const lastChange = history.pop();
 
+		if (lastChange.type === "edit") {
+			await writeFileAsync(
+				lastChange.filepath,
+				lastChange.componentContent,
+				"utf8"
+			);
+
+			if (lastChange.csspath && lastChange.stylesheetContent) {
+				await writeFileAsync(
+					lastChange.csspath,
+					lastChange.stylesheetContent,
+					"utf8"
+				);
+			}
+
+			return wrapSuccess(null);
+		} else {
+			return wrapError("Unknown action type");
+		}
+	});
+
+	const getComponent = async (filePath) => {
 		// Check if the file exists
 		try {
 			// Check if the file exists
@@ -238,6 +268,33 @@ const createWindow = () => {
 				error: err.message,
 			});
 		}
+	};
+
+	// Listen for events from development view
+	ipcMain.on("click-event", async (event, data) => {
+		console.log("Component selected:", data.component);
+
+		if (!projectDir) {
+			console.error("Project directory not set");
+			event.reply("component-selected", { error: "Project directory not set" });
+			return;
+		}
+
+		// Use fs to locate the file
+		const filePath = data.component;
+
+		await getComponent(filePath);
+	});
+
+	ipcMain.handle("select-component", async (event, data) => {
+		const filepath = data.path;
+
+		await getComponent(filepath);
+
+		return wrapSuccess({
+			exists: true,
+			path: filepath,
+		});
 	});
 
 	ipcMain.handle("set-project-dir", (event, path) => {
@@ -280,6 +337,11 @@ const createWindow = () => {
 			view.webContents.loadURL(data.url);
 			url = data.url;
 			store.set("url", url);
+
+			if (toggleEditModeValue) {
+				toggleEditMode();
+			}
+
 			return wrapSuccess(null);
 		} catch (error) {
 			return wrapError(error);
@@ -288,6 +350,11 @@ const createWindow = () => {
 
 	ipcMain.handle("reload-page", (event, data) => {
 		view.webContents.reload();
+
+		if (toggleEditModeValue) {
+			toggleEditMode();
+		}
+
 		return wrapSuccess(null);
 	});
 
@@ -408,13 +475,59 @@ const createWindow = () => {
 		}
 	};
 
+	const sendComponents = async () => {
+		try {
+			const components = await view.webContents.executeJavaScript(`
+				new Promise(resolve => {
+					setTimeout(() => {
+						if (document.readyState === "complete") {
+							resolve(getComponents());
+						} else {
+							document.addEventListener("DOMContentLoaded", () => resolve(getComponents()));
+						}
+					}, 2000); // 2 second delay
+			
+					function getComponents() {
+						const components = [];
+						const elementsInView = Array.from(document.querySelectorAll('[data-component]')).filter(el => {
+							const rect = el.getBoundingClientRect();
+							return (
+								rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+								rect.left < (window.innerWidth || document.documentElement.clientWidth) &&
+								rect.bottom > 0 &&
+								rect.right > 0
+							);
+						});
+						elementsInView.forEach((element) => {
+							const component = element.getAttribute('data-component');
+							components.push(component);
+						});
+						return components;
+					}
+				})
+			`);
+
+			console.log("Components:", components);
+
+			console.log("Components:", components);
+
+			floatingWindow.webContents.send("components", components);
+		} catch (error) {
+			console.error("Error sending components:", error);
+		}
+	};
+
 	ipcMain.handle("toggle-edit-mode", async (event, data) => {
+		toggleEditModeValue = !toggleEditModeValue;
 		return await toggleEditMode();
 	});
 
 	view.webContents.on("did-finish-load", () => {
+		console.log("Loaded URL:", url);
+
 		// add an on hover to all the elements
 		toggleEditMode();
+		sendComponents();
 	});
 
 	const floatingWindow = new BrowserWindow({
@@ -449,12 +562,6 @@ const createWindow = () => {
 			newComponentPrompt,
 			editComponentPrompt,
 		});
-		// send event to renderer
-		/*if (projectDir) {
-			floatingWindow.setTitle(
-				`${projectDir.substr(projectDir.lastIndexOf("\\") + 1)}`
-			);
-		}*/
 	});
 };
 

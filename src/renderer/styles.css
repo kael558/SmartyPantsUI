@@ -159,6 +159,41 @@ span.left-ellipsis {
     margin-bottom: 0px;
 }
 
+#component-list {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+#component-list h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+#component-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.component-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 5px;
+    border: 1px solid #eee;
+    border-radius: 3px;
+}
+
+.component-name {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.component-item .action-btn {
+    margin-left: 5px;
+}
+
 #status-bar {
     position: fixed;
     bottom: 0;

@@ -72,12 +72,17 @@ The current main features in the Development Environment are:
 
 ## 📅 Roadmap
 - [x] Initial POC
-- [ ] Fix the fact that stylesheet is sometimes not included
-- [ ] Hook up the following:
--- [ ] Extra instructions
--- [ ] Add open dev tools
--- [ ] Add reload and url input
-- [ ] 
+- [x] Fix the fact that stylesheet is sometimes not included
+- [x] Hook up the following:
+-- [x] Extra instructions
+-- [x] Add open dev tools
+-- [x] Add reload and url input
+- [x] Hook  up undo
+- [ ] Show all components on this page (hovering over, will show it in hover) 
+- [ ] Offer to break down larger components into smaller components
+- [ ] Fix toggle select mode
+- [ ] Clicking on component in list will show it in the UI
+
 - [ ] Project aware styling
 - [ ] Handling re-use of components
 - [ ] Expanding frameworks to include others (like next.js)
