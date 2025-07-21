@@ -244,19 +244,21 @@ const createWindow = () => {
 
 	const getComponent = async (filePath) => {
 		// Check if the file exists
+
+		const fullPath = path.join(projectDir, filePath);
 		try {
 			// Check if the file exists
-			await statAsync(filePath);
-			console.log("File exists:", filePath);
+			await statAsync(fullPath);
+			console.log("File exists:", fullPath);
 
 			// Read the file content
-			const data = await readFileAsync(filePath, "utf8");
-			console.log("Filepath:", filePath);
+			const data = await readFileAsync(fullPath, "utf8");
+			console.log("Filepath:", fullPath);
 
 			// Send back that the file exists, its path, and its content
 			floatingWindow.webContents.send("component-selected", {
 				exists: true,
-				path: filePath,
+				path: fullPath,
 				content: data,
 			});
 		} catch (err) {
@@ -264,7 +266,7 @@ const createWindow = () => {
 
 			floatingWindow.webContents.send("component-selected", {
 				exists: false,
-				path: filePath,
+				path: fullPath,
 				error: err.message,
 			});
 		}
@@ -273,6 +275,7 @@ const createWindow = () => {
 	// Listen for events from development view
 	ipcMain.on("click-event", async (event, data) => {
 		console.log("Component selected:", data.component);
+		console.log(projectDir);
 
 		if (!projectDir) {
 			console.error("Project directory not set");
@@ -485,7 +488,7 @@ const createWindow = () => {
 						} else {
 							document.addEventListener("DOMContentLoaded", () => resolve(getComponents()));
 						}
-					}, 2000); // 2 second delay
+					}, 3000); // 2 second delay
 			
 					function getComponents() {
 						const components = [];
@@ -509,9 +512,10 @@ const createWindow = () => {
 
 			console.log("Components:", components);
 
-			console.log("Components:", components);
+			// get first 2 components
+			const firstTwoComponents = components.slice(0, 2);
 
-			floatingWindow.webContents.send("components", components);
+			floatingWindow.webContents.send("components", firstTwoComponents);
 		} catch (error) {
 			console.error("Error sending components:", error);
 		}

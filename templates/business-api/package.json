@@ -1,0 +1,27 @@
+{
+	"name": "api",
+	"version": "1.0.0",
+	"description": "",
+	"devDependencies": {
+		"serverless-domain-manager": "^7.4.0"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.712.0",
+		"@aws-sdk/s3-request-presigner": "^3.712.0",
+		"@mendable/firecrawl-js": "^1.9.1",
+		"@pinecone-database/pinecone": "^3.0.3",
+		"auth-sdk": "file:../auth/sdk",
+		"body-parser": "^1.20.3",
+		"cohere-ai": "^7.15.0",
+		"cors": "^2.8.5",
+		"express": "^4.21.2",
+		"multer": "^1.4.5-lts.1",
+		"node-vibrant": "^4.0.3",
+		"nodemailer": "^6.10.0",
+		"serverless-http": "^3.2.0",
+		"stripe": "^17.5.0",
+		"terser": "^5.37.0",
+		"tinycolor2": "^1.6.0",
+		"unstructured-client": "^0.22.0"
+	}
+}

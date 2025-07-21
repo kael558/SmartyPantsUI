@@ -24,41 +24,47 @@
   </ol>
 </details>
 
-
-
 ## 🤔 What is this?
+
 An integrated development environment to speed up front-end development.
 
 A user can view their development server through the development environment to gain access to features.
 
-## 📖 Getting Started 
+## 📖 Getting Started
+
 ### ⚡️ Quick Install
+
 Clone the project to your desired folder with:
 `git clone https://github.com/kael558/SmartyPantsUI.git`
 
 ### ⛓️ Run the Langflows
+
 Download the 4 langflows and populate the API keys/applications secrets.
 
 These are now an API that you can call from your local machine.
 
 ### 🤖 Running a Local Development Server
-Navigate to the templates folder and open 'my-app' for a good first example. 
+
+Navigate to the templates folder and open 'my-app' for a good first example.
 
 Make sure to run `npm i` and then `npm start` to spin up the local development server.
 
 ### 📁 Start up the Development Environment
+
 Navigate back to the root of the project.
 
-Do the same and run `npm i` and then `npm start` 
+Do the same and run `npm i` and then `npm start`
 
-Copy your path from the Local Development Server and paste it in the project_dir, so that the environment knows where the files are. 
+Copy your path from the Local Development Server and paste it in the project_dir, so that the environment knows where the files are.
 
 By this point you should have:
+
 - Langflow running with 4 langflow endpoints
 - A local development server running the React starter template
 - The development environment
 
 The current main features in the Development Environment are:
+
 - Clicking on the UI and seeing the retrieved source code. You can make edits and save that code to see live updates in the UI.
 - After a component is selected, you may type in the text input and:
   - Request an edit (e.g., changing the text/styling) and then clicking 'Edit'
@@ -67,30 +73,49 @@ The current main features in the Development Environment are:
   - So a user can easily select and find components in their project
   - It is also for a future feature to allow re-use of existing components instead of always creating new ones
 
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## 📅 Roadmap
-- [x] Initial POC
-- [x] Fix the fact that stylesheet is sometimes not included
-- [x] Hook up the following:
--- [x] Extra instructions
--- [x] Add open dev tools
--- [x] Add reload and url input
-- [x] Hook  up undo
-- [ ] Show all components on this page (hovering over, will show it in hover) 
-- [ ] Offer to break down larger components into smaller components
-- [ ] Fix toggle select mode
-- [ ] Clicking on component in list will show it in the UI
 
 - [ ] Project aware styling
 - [ ] Handling re-use of components
-- [ ] Expanding frameworks to include others (like next.js)
+- [ ] Index documents of specific documentation websites
+- [ ] Index the components in the project
+- [ ] Self healing Cypress tests or Selenium
+- [ ] Staging environments
+- [ ] Auth with Firebase + Payments with Stripe included
+- [ ] Backend included with AWS dynamoDB with backend Flow
+- [ ] Integrated + automated SEO given keywords
+- [ ] AI Agent friendly by automatically creating a separate markdown build for the AI Agent- https://chat.deepseek.com/a/chat/s/5ae834b0-6599-41f3-8289-ccabfe1cb643
+- [ ] Automatic creation of MCP for the server
+- [ ] Multiple versions with different UI and percent controlled
+
+- [ ] Actions:
+- [ ]
+- [ ] Add, Edit, Delete API endpoint (modifies businessProvider + backend handler)
+- [ ] Add test
+- [ ] Edit component, add component, delete component
+- [ ]
+
+UI bar that you can drag around and it has different buttons. That slidedown different small windows (only 1 open at a time).
+Initial set up:
+
+- Firebase config, stripe secret key, stripe signing key, AWS secret keys, Claude API key, Prerender token, email password, user. Local dynamoDB setup.
+
+1. Chat. Branding colors, design guidelines system prompt. Also shows how many components are selected.
+2. Show which documentation websites are indexed.
+3. Tests (add use case test). And shows current tests with last run, last status. And there is a video attached to each. Add a system prompt for additional information that the AI agent needs to do the test.
+4. Change staging env and do roll-out percentage and show deploy button for each (link will display next to it).
+5. SEO tab (shows current rankings for the set keywords and then will have a button to "improve").
+6. AI button with a toggle AI agent view (show markdown of website) + generate MCP button.
+7. Secrets + config (that shows the content of that initial stuff)
 
 ## 🤝 Contributing
+
 You may fork the project and work in your own repository.
 
 ## ⚖️ License
+
 Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

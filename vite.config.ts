@@ -6,6 +6,11 @@ export default {
 			main: {
 				// Shortcut of `build.lib.entry`
 				entry: "src/main/main.js",
+				vite: {
+					build: {
+						watch: {}
+					}
+				}
 			},
 			preload: {
 				// Shortcut of `build.rollupOptions.input`

@@ -1,0 +1,41 @@
+service: web-indexer-web
+
+provider:
+    name: aws
+    runtime: nodejs20.x
+
+plugins:
+    - serverless-plugin-scripts
+    - serverless-domain-manager
+    - serverless-dotenv-plugin
+
+useDotenv: true
+
+build:
+    esbuild: true
+
+package:
+    patterns:
+        - "!app/**"
+        - app/build/**
+
+custom:
+    customDomain:
+        domainName: ${param:customDomainName}
+        certificateArn: ${param:customDomainCertificateARN}
+        stage: ""
+        endpointType: "regional"
+        apiType: http
+        autoDomain: true
+        enabled: ${param:customDomainNameEnabled}
+    scripts:
+        hooks:
+            # This hook builds the React App. It sets the environment variables for
+            # the Chat and Auth APIs and then runs the build script.
+            # Use npx to run cross-env, which ensures it's available in the local environment
+            "before:esbuild-package:package": "cd website/app && npx cross-env VITE_BUSINESS_API_URL=${param:businessApiUrl} VITE_CHAT_API_URL=${param:chatApiUrl} VITE_S3_BUCKET_NAME=${param:S3_BUCKET_NAME} VITE_REST_API_URL=${param:restApiUrl} npm run build"
+functions:
+    app:
+        handler: index.handler
+        events:
+            - httpApi: "*"
