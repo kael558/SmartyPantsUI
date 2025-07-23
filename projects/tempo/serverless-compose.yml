@@ -1,0 +1,33 @@
+stages:
+  default:
+    params:
+      # The customDomainName enables support for custom domain names. As long as
+      # this value is false, the subsequent parameters are ignored. However,
+      # they are referenced in the serverless.yml files of the services,
+      # therefore we define defaults such that the variables can be resolved.
+      customDomainNameEnabled: false
+      customDomainName: <your-domain-name>
+      customDomainCertificateARN: <your-certificate-arn>
+
+  prod:
+    params:
+      # In production, the custom domain name is enabled, and therefore the
+      # customDomainCertificateARN value must be set. The README providers
+      # more details on setting up the Certificate.
+      customDomainNameEnabled: true
+      customDomainName: <your-domain-name>
+      customDomainCertificateARN: <your-certificate-arn>
+services:
+  eventBus:
+    path: ./event-bus
+  aiChatApi:
+    path: ./ai-chat-api
+  web:
+    path: ./website
+  businessApi:
+    path: ./business-api
+  businessWorker:
+    path: ./business-worker
+    params:
+      eventBusArn: ${eventBus.EventBusArn}
+      eventBusName: ${eventBus.EventBusName}

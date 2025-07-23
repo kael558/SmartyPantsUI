@@ -1,0 +1,24 @@
+{
+	"enabled": false,
+	"stage": "dev",
+	"tests": [
+		{
+			"name": "Hero Banner Test",
+			"enabled": true,
+			"variants": [
+				{
+					"name": "Control",
+					"build": "app",
+					"rollout": 50
+				},
+				{
+					"name": "Variant A",
+					"build": "hero-variant-build",
+					"rollout": 50
+				}
+			]
+		}
+	],
+	"defaultBuild": "app",
+	"createdAt": "2024-01-01T00:00:00.000Z"
+}

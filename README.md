@@ -102,7 +102,7 @@ Initial set up:
 
 - Firebase config, stripe secret key, stripe signing key, AWS secret keys, Claude API key, Prerender token, email password, user. Local dynamoDB setup.
 
-1. Chat. Branding colors, design guidelines system prompt. Also shows how many components are selected.
+1. Chat. Opens a chat window. Shows additional buttons about selecting branding colors, design guidelines system prompt. Also shows how many components are selected.
 2. Show which documentation websites are indexed.
 3. Tests (add use case test). And shows current tests with last run, last status. And there is a video attached to each. Add a system prompt for additional information that the AI agent needs to do the test.
 4. Change staging env and do roll-out percentage and show deploy button for each (link will display next to it).

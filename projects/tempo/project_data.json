@@ -1,0 +1,17 @@
+{
+  "name": "tempo",
+  "designGuidelines": {
+    "guidelines": ""
+  },
+  "tests": [
+    {
+      "id": "1753299696363",
+      "name": "Click get started",
+      "instructions": "Does the get started button work?",
+      "status": "failed",
+      "createdAt": "2025-07-23T19:41:36.363Z",
+      "error": "AI test failed: Command failed: npx playwright test C:\\Users\\Rahel\\PycharmProjects\\SmartyPantsUI\\projects\\tempo\\temp-ai-test-1753299696363.js --reporter=json\n"
+    }
+  ],
+  "lastUpdated": "2025-07-23T19:41:41.206Z"
+}

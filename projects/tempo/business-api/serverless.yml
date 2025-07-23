@@ -1,0 +1,147 @@
+service: web-indexer-api
+
+frameworkVersion: "4"
+
+stages:
+    default:
+        params:
+            customDomainNameAuthAPI: ${param:customDomainName, 'NA'}
+            projectsTableName: ${self:service}-projects-table-${sls:stage}
+            leadsDbTableName: web-indexer-api-leads-table-${sls:stage}
+
+provider:
+    name: aws
+    runtime: nodejs20.x
+    profile: webindexer
+    region: us-east-1
+    httpApi:
+        cors: true
+    apiGateway:
+        timeoutInMillis: 120000
+    environment:
+        PROJECTS_TABLE_NAME: ${param:projectsTableName}
+        LEADS_TABLE_NAME: ${param:leadsDbTableName}
+        S3_BUCKET_NAME: ${param:S3_BUCKET_NAME}
+        REST_API_URL: ${param:restApiUrl}
+    iam:
+        role:
+            statements:
+                - Effect: Allow
+                  Action:
+                      - dynamodb:Query
+                      - dynamodb:Scan
+                      - dynamodb:GetItem
+                      - dynamodb:PutItem
+                      - dynamodb:UpdateItem
+                      - dynamodb:DeleteItem
+                      - dynamodb:BatchWriteItem
+                  Resource:
+                      - "arn:aws:dynamodb:us-east-1:836635650324:table/web-indexer-api-projects-table-${sls:stage}"
+                      - Fn::Join:
+                            - ""
+                            - - "arn:aws:dynamodb:us-east-1:836635650324:table/web-indexer-api-projects-table-${sls:stage}"
+                              - "/index/*"
+                      - "arn:aws:dynamodb:us-east-1:836635650324:table/${param:leadsDbTableName}"
+                - Effect: Allow
+                  Action:
+                      - s3:GetObject
+                      - s3:PutObject
+                  Resource:
+                      - Fn::Join:
+                            - ""
+                            - - "arn:aws:s3:::"
+                              - ${param:S3_BUCKET_NAME}
+                              - "/*"
+
+package:
+    patterns:
+        - "!node_modules/**"
+        - "!.git/**"
+        - "script_template.txt"
+
+plugins:
+    - serverless-domain-manager
+    - serverless-dotenv-plugin
+
+useDotenv: true
+
+build:
+    esbuild: true
+
+custom:
+    customDomain:
+        domainName: ${param:customDomainName}
+        certificateArn: ${param:customDomainCertificateARN, 'NA'}
+        stage: ""
+        endpointType: regional
+        apiType: http
+        autoDomain: true
+        enabled: ${param:customDomainNameEnabled, false}
+        basePath: ${self:service}
+    apiGateway:
+        apiType: REGIONAL # Add this section
+        description: "Regional API Gateway"
+
+functions:
+    api:
+        handler: handler.handler
+        timeout: 30
+        events:
+            - httpApi:
+                  path: /{proxy+}
+                  method: any
+    rest:
+        handler: rest_handler.handler
+        timeout: 120
+        events:
+            - http:
+                  method: ANY
+                  path: "/{proxy+}"
+                  timeoutInMillis: 120000
+                  cors: true
+
+    file_handler:
+        handler: file_handler.handler
+        timeout: 240
+        events:
+            - s3:
+                  bucket: ${param:S3_BUCKET_NAME}
+                  existing: true
+                  event: s3:ObjectCreated:*
+                  rules:
+                      - prefix: pdfs/
+
+resources:
+    Conditions:
+        CustomDomainNameEnabled:
+            Fn::Equals:
+                - ${param:customDomainNameEnabled, false}
+                - true
+    Resources:
+        ProjectsTable:
+            Type: AWS::DynamoDB::Table
+            Properties:
+                AttributeDefinitions:
+                    - AttributeName: projectId
+                      AttributeType: S
+                    - AttributeName: createdByUserId
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: projectId
+                      KeyType: HASH
+                GlobalSecondaryIndexes:
+                    - IndexName: createdByUserIdIndex
+                      KeySchema:
+                          - AttributeName: createdByUserId
+                            KeyType: HASH
+                      Projection:
+                          ProjectionType: ALL
+                BillingMode: PAY_PER_REQUEST
+                TableName: ${param:projectsTableName}
+    Outputs:
+        BusinessApiUrl:
+            Value:
+                Fn::If:
+                    - CustomDomainNameEnabled
+                    - !Sub "https://${param:customDomainNameAuthAPI}/${self:service}"
+                    - !GetAtt HttpApi.ApiEndpoint

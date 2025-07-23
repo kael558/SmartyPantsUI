@@ -1,0 +1,32 @@
+{
+  "name": "business-api-client",
+  "version": "1.0.0",
+  "description": "MCP client for business API endpoints",
+  "baseUrl": "{{API_BASE_URL}}",
+  "tools": [
+    {
+      "name": "post_api_v1_register",
+      "description": "POST request to /api/v1/register",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "handler": {
+        "method": "POST",
+        "url": "{{API_BASE_URL}}/api/v1/register",
+        "headers": {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer {{AUTH_TOKEN}}"
+        }
+      }
+    }
+  ],
+  "usage": {
+    "example": "Replace {{API_BASE_URL}} with your API base URL and {{AUTH_TOKEN}} with your authentication token",
+    "variables": {
+      "API_BASE_URL": "https://your-api-domain.com",
+      "AUTH_TOKEN": "your-jwt-token-here"
+    }
+  }
+}
